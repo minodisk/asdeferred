@@ -34,7 +34,9 @@ public class Deferred {
     d.canceller = function ():void {
       clearTimeout(id);
     };
-    if (fun) d.callback.ok = fun;
+    if (fun !== null) {
+      d.callback.ok = fun;
+    }
     return d;
   }
 
@@ -66,35 +68,35 @@ public class Deferred {
     return chain;
   }
 
-  static public function wait(n):Deferred {
+  static public function wait(n:Number):Deferred {
     var d:Deferred = new Deferred(), t:Date = new Date();
     var id:uint = setTimeout(function ():void {
       d.call((new Date()).getTime() - t.getTime());
     }, n * 1000);
-    d.canceller = function () {
+    d.canceller = function ():void {
       clearTimeout(id)
     };
     return d;
   }
 
   static public function call(fun:Function, ...args:Array):Deferred {
-    return Deferred.next(function () {
+    return Deferred.next(function ():* {
       return fun.apply(this, args);
     });
   }
 
-  static public function parallel(dl) {
+  static public function parallel(dl:*):Deferred {
     var isArray:Boolean = false;
     if (arguments.length > 1) {
       dl = Array.prototype.slice.call(arguments);
       isArray = true;
-    } else if (Array.isArray(dl)) {
+    } else if (dl is Array) {
       isArray = true;
     }
     var ret:Deferred = new Deferred(), values:Object = {}, num:int = 0;
-    for (var i in dl) if (dl.hasOwnProperty(i)) (function (d, i) {
+    for (var i:* in dl) if (dl.hasOwnProperty(i)) (function (d:*, i:*):void {
       if (d is Function) dl[i] = d = Deferred.next(d);
-      d.next(function (v):void {
+      d.next(function (v:*):void {
         values[i] = v;
         if (--num <= 0) {
           if (isArray) {
@@ -103,34 +105,34 @@ public class Deferred {
           }
           ret.call(values);
         }
-      }).error(function (e):void {
+      }).error(function (e:Error):void {
           ret.fail(e);
         });
       num++;
     })(dl[i], i);
 
-    if (!num) Deferred.next(function () {
+    if (!num) Deferred.next(function ():void {
       ret.call();
     });
     ret.canceller = function ():void {
-      for (var i in dl) if (dl.hasOwnProperty(i)) {
+      for (var i:* in dl) if (dl.hasOwnProperty(i)) {
         dl[i].cancel();
       }
     };
     return ret;
   }
 
-  static public function earlier(dl) {
-    var isArray = false;
+  static public function earlier(dl:*):Deferred {
+    var isArray:Boolean = false;
     if (arguments.length > 1) {
       dl = Array.prototype.slice.call(arguments);
       isArray = true;
-    } else if (Array.isArray && Array.isArray(dl) || typeof dl.length == "number") {
+    } else if (dl is Array) {
       isArray = true;
     }
-    var ret = new Deferred(), values = {}, num = 0;
-    for (var i in dl) if (dl.hasOwnProperty(i)) (function (d, i) {
-      d.next(function (v) {
+    var ret:Deferred = new Deferred(), values:Object = {}, num:int = 0;
+    for (var i:* in dl) if (dl.hasOwnProperty(i)) (function (d:*, i:*):void {
+      d.next(function (v:*):void {
         values[i] = v;
         if (isArray) {
           values.length = dl.length;
@@ -138,34 +140,34 @@ public class Deferred {
         }
         ret.call(values);
         ret.canceller();
-      }).error(function (e) {
+      }).error(function (e:Error):void {
           ret.fail(e);
         });
       num++;
     })(dl[i], i);
 
-    if (!num) Deferred.next(function () {
+    if (!num) Deferred.next(function ():void {
       ret.call()
     });
-    ret.canceller = function () {
-      for (var i in dl) if (dl.hasOwnProperty(i)) {
+    ret.canceller = function ():void {
+      for (var i:* in dl) if (dl.hasOwnProperty(i)) {
         dl[i].cancel();
       }
     };
     return ret;
   }
 
-  static public function loop(n, fun) {
-    var o = {
+  static public function loop(n:*, fun:Function):Deferred {
+    var o:Object = {
       begin: n.begin || 0,
       end  : (typeof n.end == "number") ? n.end : n - 1,
       step : n.step || 1,
       last : false,
       prev : null
     };
-    var ret, step = o.step;
-    return Deferred.next(function () {
-      function _loop(i) {
+    var ret:*, step:int = o.step;
+    return Deferred.next(function ():Deferred {
+      function _loop(i:int):* {
         if (i <= o.end) {
           if ((i + step) > o.end) {
             o.last = true;
@@ -174,7 +176,7 @@ public class Deferred {
           o.prev = ret;
           ret = fun.call(this, i, o);
           if (Deferred.isDeferred(ret)) {
-            return ret.next(function (r) {
+            return ret.next(function (r:*):Deferred {
               ret = r;
               return Deferred.call(_loop, i + step);
             });
@@ -190,10 +192,10 @@ public class Deferred {
     });
   }
 
-  static public function repeat(n:int, fun:Function) {
+  static public function repeat(n:int, fun:Function):Deferred {
     var i:int = 0/*, end = {}, ret = null*/;
 
-    function next() {
+    function next():Deferred {
       var t:Number = (new Date()).getTime();
       do {
         if (i >= n) return null;
@@ -216,8 +218,8 @@ public class Deferred {
 //  Deferred.register("loop", Deferred.loop);
 //  Deferred.register("wait", Deferred.wait);
 
-  static public function connect(funo, options) {
-    var target, func, obj;
+  static public function connect(funo:*, options:*):Function {
+    var target:Object, func:Function, obj:Object;
     if (typeof arguments[1] == "string") {
       target = arguments[0];
       func = target[arguments[1]];
@@ -230,49 +232,49 @@ public class Deferred {
 
     var partialArgs:Array = obj.args ? Array.prototype.slice.call(obj.args, 0) : [];
     var callbackArgIndex:int = isFinite(obj.ok) ? obj.ok : obj.args ? obj.args.length : undefined;
-    var errorbackArgIndex = obj.ng;
+    var errorbackArgIndex:int = (obj.ng === null) ? -1 : obj.ng;
 
     return function ():Deferred {
-      var d:Deferred = new Deferred().next(function (args) {
+      var d:Deferred = new Deferred().next(function (args:Arguments):void {
         var next:Function = this._next.callback.ok;
-        this._next.callback.ok = function () {
+        this._next.callback.ok = function ():* {
           return next.apply(this, args.args);
         };
       });
 
       var args:Array = partialArgs.concat(Array.prototype.slice.call(arguments, 0));
-      if (!(isFinite(callbackArgIndex) && callbackArgIndex !== null)) {
+      if (!(isFinite(callbackArgIndex) && callbackArgIndex !== -1)) {
         callbackArgIndex = args.length;
       }
-      var callback:Function = function () {
+      var callback:Function = function ():void {
         d.call(new Arguments(arguments))
       };
       args.splice(callbackArgIndex, 0, callback);
-      if (isFinite(errorbackArgIndex) && errorbackArgIndex !== null) {
-        var errorback:Function = function () {
+      if (isFinite(errorbackArgIndex) && errorbackArgIndex !== -1) {
+        var errorback:Function = function ():void {
           d.fail(arguments)
         };
         args.splice(errorbackArgIndex, 0, errorback);
       }
-      Deferred.next(function () {
+      Deferred.next(function ():void {
         func.apply(target, args)
       });
       return d;
     };
   }
 
-  static public function retry(retryCount, funcDeferred, options) {
-    if (!options) options = {};
+  static public function retry(retryCount:int, funcDeferred:Function, options:Object = null):Deferred {
+    if (options === null) options = {};
 
-    var wait = options.wait || 0;
-    var d = new Deferred();
-    var retry = function () {
-      var m = funcDeferred(retryCount);
+    var wait:Number = options.wait || 0;
+    var d:Deferred = new Deferred();
+    var retry:Function = function ():void {
+      var m:Deferred = funcDeferred(retryCount);
       m.
-        next(function (mes) {
+        next(function (mes:*) {
           d.call(mes);
         }).
-        error(function (e) {
+        error(function (e:Error) {
           if (--retryCount <= 0) {
             d.fail(['retry failed', e]);
           } else {
@@ -284,13 +286,13 @@ public class Deferred {
     return d;
   }
 
-  static public function define(obj, list) {
-    if (!list) list = Deferred.methods;
-    if (!obj)  obj = (function getGlobal() {
+  static public function define(obj:Object = null, list:Array = null):Class {
+    if (list === null) list = Deferred.methods;
+    if (obj === null)  obj = (function getGlobal() {
       return this
     })();
-    for (var i = 0; i < list.length; i++) {
-      var n = list[i];
+    for (var i:int = 0; i < list.length; i++) {
+      var n:String = list[i];
       obj[n] = Deferred[n];
     }
     return Deferred;
@@ -327,7 +329,7 @@ public class Deferred {
     return _post("ng", fun);
   }
 
-  public function call(val):Deferred {
+  public function call(val:* = null):Deferred {
     return _fire("ok", val);
   }
 
