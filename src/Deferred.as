@@ -22,7 +22,7 @@ public class Deferred {
     throw  x;
   }
 
-  static public function isDeferred(obj:*):Boolean {
+  static public function isDeferred(obj:* = null):Boolean {
     return obj is Deferred;
   }
 
@@ -286,11 +286,11 @@ public class Deferred {
     return d;
   }
 
-  static public function define(obj:Object = null, list:Array = null):Class {
+  static public function define(obj:Object, list:Array = null):Class {
     if (list === null) list = Deferred.methods;
-    if (obj === null)  obj = (function getGlobal() {
-      return this
-    })();
+//    if (obj === null)  obj = (function getGlobal() {
+//      return this
+//    })();
     for (var i:int = 0; i < list.length; i++) {
       var n:String = list[i];
       obj[n] = Deferred[n];
@@ -354,7 +354,7 @@ public class Deferred {
     var next:String = "ok";
     try {
       value = callback[okng].call(this, value);
-    } catch (e:Error) {
+    } catch (e:*) {
       next = "ng";
       value = e;
       if (onerror) onerror(e);
