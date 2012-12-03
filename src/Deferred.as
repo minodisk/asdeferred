@@ -299,8 +299,8 @@ public class Deferred {
   }
 
 
-  public var loop:Function = loop;
-  public var wait:Function = wait;
+  public var loop:Function = Deferred.loop;
+  public var wait:Function = Deferred.wait;
 
   public var callback:Object;
   public var canceller:Function;
@@ -354,7 +354,12 @@ public class Deferred {
     var next:String = "ok";
     try {
       value = callback[okng].call(this, value);
+    } catch(e:Error) {
+      next = "ng";
+      value = e;
+      if (onerror) onerror(e);
     } catch (e:*) {
+      e = new Error(e);
       next = "ng";
       value = e;
       if (onerror) onerror(e);

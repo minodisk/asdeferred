@@ -247,8 +247,8 @@ public class Test extends Sprite {
       expect("Deferred.isDeferred({})", false, Deferred.isDeferred({}));
     };
 
-    Deferred.onerror = function (e) {
-      log("DEBUG: Errorback will invoke:" + e);
+    Deferred.onerror = function (e:Error) {
+      log("DEBUG: Errorback will invoke:" + e.getStackTrace());
     };
 
 // Start Main Test
@@ -314,10 +314,6 @@ public class Test extends Sprite {
       next(function () {
 //        delete Deferred.prototype.wait;
 //        Deferred.register("wait", wait);
-
-        trace('wait:', new Deferred().wait);
-        trace('loop:', new Deferred().loop);
-
         return next(function () {
           msg("register test");
         }).
