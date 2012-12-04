@@ -40,9 +40,9 @@ public class Deferred {
     return d;
   }
 
-  static public function chain():Deferred {
+  static public function chain(...args:Array):Deferred {
     var chain:Deferred = Deferred.next();
-    for (var i:int = 0, len:int = arguments.length; i < len; i++) (function (obj:*):void {
+    for (var i:int = 0, len:int = args.length; i < len; i++) (function (obj:*):void {
       switch (typeof obj) {
         case "function":
           var name:String = null;
@@ -64,7 +64,7 @@ public class Deferred {
         default:
           throw "unknown type in process chains";
       }
-    })(arguments[i]);
+    })(args[i]);
     return chain;
   }
 
@@ -88,16 +88,16 @@ public class Deferred {
   static public function parallel(...args:Array):Deferred {
     var dl:* = args.length > 1 ? args : args[0];
     var isArray:Boolean = dl is Array;
-    var ret:Deferred = new Deferred(), values:Object = {}, num:int = 0;
+    var ret:Deferred = new Deferred(), values:* = isArray ? [] : {}, num:int = 0;
     for (var i:* in dl) if (dl.hasOwnProperty(i)) (function (d:*, i:*):void {
       if (d is Function) dl[i] = d = Deferred.next(d);
       d.next(function (v:*):void {
         values[i] = v;
         if (--num <= 0) {
-          if (isArray) {
-            values.length = dl.length;
-            values = Array.prototype.slice.call(values, 0);
-          }
+//          if (isArray) {
+//            values.length = dl.length;
+//            values = Array.prototype.slice.call(values, 0);
+//          }
           ret.call(values);
         }
       }).error(function (e:Error):void {
@@ -120,14 +120,14 @@ public class Deferred {
   static public function earlier(...args:Array):Deferred {
     var dl:* = args.length > 1 ? args : args[0];
     var isArray:Boolean = dl is Array;
-    var ret:Deferred = new Deferred(), values:Object = {}, num:int = 0;
+    var ret:Deferred = new Deferred(), values:* = isArray ? [] : {}, num:int = 0;
     for (var i:* in dl) if (dl.hasOwnProperty(i)) (function (d:*, i:*):void {
       d.next(function (v:*):void {
         values[i] = v;
-        if (isArray) {
-          values.length = dl.length;
-          values = Array.prototype.slice.call(values, 0);
-        }
+//        if (isArray) {
+//          values.length = dl.length;
+//          values = Array.prototype.slice.call(values, 0);
+//        }
         ret.call(values);
         ret.canceller();
       }).error(function (e:Error):void {
