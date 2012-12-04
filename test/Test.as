@@ -270,6 +270,9 @@ public class Test extends Sprite {
 
     Deferred.onerror = function (e) {
       log("DEBUG: Errorback will invoke:" + e);
+      if (e is Error) {
+        trace((e as Error).getStackTrace());
+      }
     };
 
 // Start Main Test
@@ -353,398 +356,398 @@ public class Test extends Sprite {
           error(function (e) {
             ng(e);
           });
+      }).
+      next(function () {
+        var a, b;
+        return next(function () {
+          function pow(x, n) {
+            expect("child deferred chain", a._next, b._next);
+            function _pow(n, r) {
+              print(uneval([n, r]));
+              if (n == 0) return r;
+              return call(_pow, n - 1, x * r);
+            }
+
+            return call(_pow, n, 1);
+          }
+
+          a = this;
+          b = call(pow, 2, 10);
+          return b;
+        }).
+          next(function (r) {
+            expect("pow calculate", 1024, r);
+          }).
+          error(function (e) {
+            ng("Error on pow", "", e);
+          });
+      }).
+      error(function (e) {
+        ng("Error on Test Callback, Errorback chain", "", e);
+      }).
+      next(function () {
+        msg("Utility Functions Tests::");
+
+        return next(function () {
+          return wait(0).next(function (i) {
+            ok("wait(0) called", "1000ms >", i);
+          });
+        }).
+          next(function () {
+          }).
+          error(function (e) {
+            ng("Error on wait Tests", "", e);
+          }).
+          next(function () {
+            return call(function (test) {
+              expect("call test1", 10, test);
+              return call(function (t, u) {
+                expect("call test2", 10, t);
+                expect("call test2", 20, u);
+              }, 10, 20);
+            }, 10);
+          }).
+          next(function () {
+            var t = 0;
+            return loop(5,function (i) {
+              expect("loop num", t++, i);
+              /* dummy for expects
+               * expect()
+               * expect()
+               * expect()
+               * expect()
+               */
+              return "ok";
+            }).next(function (r) {
+                expect("loop num. result", "ok", r);
+                expect("loop num. result", 5, t);
+              });
+          }).
+          next(function () {
+            var t = 0;
+            return loop(2,function (i) {
+              expect("loop num", t++, i);
+              /* dummy for expects
+               * expect()
+               */
+              return "ok";
+            }).next(function (r) {
+                expect("loop num. result", "ok", r);
+                expect("loop num. result", 2, t);
+              });
+          }).
+          next(function () {
+            var t = 0;
+            return loop(1,function (i) {
+              expect("loop num", t++, i);
+              return "ok";
+            }).next(function (r) {
+                expect("loop num. result", "ok", r);
+                expect("loop num. result", 1, t);
+              });
+          }).
+          next(function () {
+            var t = 0;
+            return loop(0,function (i) {
+              t++;
+            }).next(function () {
+                expect("loop num 0 to 0. result", 0, t);
+              });
+          }).
+          next(function () {
+            var t = 0;
+            return loop({begin: 0, end: 0},function (i) {
+              t++;
+            }).next(function () {
+                expect("loop num begin:0 to end:0. result", 1, t);
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({end: 10, step: 1},function (n, o) {
+              print(uneval(o));
+              r.push(n);
+              l.push(o.last);
+              return r;
+            }).next(function (r) {
+                expect("loop end:10, step:1", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop end:10, step:1 last?", [false, false, false, false, false, false, false, false, false, false, true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({end: 10, step: 2},function (n, o) {
+              print(uneval(o));
+              l.push(o.last);
+              for (var i = 0; i < o.step; i++) {
+                r.push(n + i);
+              }
+              return r;
+            }).next(function (r) {
+                expect("loop end:10, step:2", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop end:10, step:2 last?", [false, false, false, false, false, true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({end: 10, step: 3},function (n, o) {
+              print(uneval(o));
+              l.push(o.last);
+              for (var i = 0; i < o.step; i++) {
+                r.push(n + i);
+              }
+              return r;
+            }).next(function (r) {
+                expect("loop end:10, step:3", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop end:10, step:3 last?", [false, false, false, true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({end: 10, step: 5},function (n, o) {
+              print(uneval(o));
+              l.push(o.last);
+              for (var i = 0; i < o.step; i++) {
+                r.push(n + i);
+              }
+              return r;
+            }).next(function (r) {
+                expect("loop end:10, step:5", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop end:10, step:5 last?", [false, false, true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({end: 10, step: 9},function (n, o) {
+              print(uneval(o));
+              l.push(o.last);
+              for (var i = 0; i < o.step; i++) {
+                r.push(n + i);
+              }
+              return r;
+            }).next(function (r) {
+                expect("loop end:10, step:9", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop end:10, step:9 last?", [false, true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({end: 10, step: 10},function (n, o) {
+              print(uneval(o));
+              l.push(o.last);
+              for (var i = 0; i < o.step; i++) {
+                r.push(n + i);
+              }
+              return r;
+            }).next(function (r) {
+                expect("loop end:10, step:10", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop end:10, step:10 last?", [false, true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({end: 10, step: 11},function (n, o) {
+              print(uneval(o));
+              l.push(o.last);
+              for (var i = 0; i < o.step; i++) {
+                r.push(n + i);
+              }
+              return r;
+            }).next(function (r) {
+                expect("loop end:10, step:11", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop end:10, step:11 last?", [true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            var l = [];
+            return loop({begin: 1, end: 10, step: 3},function (n, o) {
+              print(uneval(o));
+              l.push(o.last);
+              for (var i = 0; i < o.step; i++) {
+                r.push(n + i);
+              }
+              return r;
+            }).next(function (r) {
+                expect("loop begin:1, end:10, step:3", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
+                expect("loop begin:1, end:10, step:3 last?", [false, false, false, true].join(), l.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            return repeat(0,function (i) {
+              r.push(i);
+            }).
+              next(function (ret) {
+                expect("repeat 0 ret val", undefined, ret);
+                expect("repeat 0", [].join(), r.join());
+              });
+          }).
+          next(function () {
+            var r = [];
+            return repeat(10,function (i) {
+              r.push(i);
+            }).
+              next(function (ret) {
+                expect("repeat 10", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].join(), r.join());
+              });
+          }).
+          next(function () {
+            return parallel([]).
+              next(function () {
+                ok("parallel no values");
+              });
+          }).
+          next(function () {
+            return parallel([next(function () {
+              return 0
+            }), next(function () {
+              return 1
+            })]).
+              next(function (values) {
+                print(uneval(values));
+                expect("parallel values 0", 0, values[0]);
+                expect("parallel values 1", 1, values[1]);
+              });
+          }).
+          next(function () {
+            return parallel({foo: next(function () {
+              return 0
+            }), bar: next(function () {
+              return 1
+            })}).
+              next(function (values) {
+                print(uneval(values));
+                expect("parallel named values foo", 0, values.foo);
+                expect("parallel named values bar", 1, values.bar);
+              });
+          }).
+          next(function () {
+            return parallel(next(function () {
+              return 0
+            }), next(function () {
+              return 1
+            })).
+              next(function (values) {
+                print(uneval(values));
+                expect("parallel values 0", 0, values[0]);
+                expect("parallel values 1", 1, values[1]);
+              });
+          }).
+          next(function () {
+            return parallel([
+              function () {
+                return 0;
+              },
+              function () {
+                return 1;
+              }
+            ]).
+              next(function (values) {
+                print(uneval(values));
+                expect("parallel values 0", 0, values[0]);
+                expect("parallel values 1", 1, values[1]);
+              });
+          }).
+          next(function () {
+            var d = parallel([
+              function () {
+                return 0;
+              },
+              function () {
+                return 1;
+              }
+            ]);
+
+            d.cancel();
+          }).
+          next(function () {
+            return Deferred.earlier([
+                wait(0).next(function () {
+                  return 1
+                }),
+                wait(1).next(function () {
+                  return 2
+                })
+              ]).
+              next(function (values) {
+                print(uneval(values));
+                expect("earlier named values 0", 1, values[0]);
+                expect("earlier named values 1", undefined, values[1]);
+              });
+          }).
+          next(function () {
+            return Deferred.earlier([
+                wait(1).next(function () {
+                  return 1
+                }),
+                wait(0).next(function () {
+                  return 2
+                })
+              ]).
+              next(function (values) {
+                print(uneval(values));
+                expect("earlier named values 0", undefined, values[0]);
+                expect("earlier named values 1", 2, values[1]);
+              });
+          }).
+          next(function () {
+            return Deferred.earlier(
+                wait(1).next(function () {
+                  return 1
+                }),
+                wait(0).next(function () {
+                  return 2
+                })
+              ).
+              next(function (values) {
+                print(uneval(values));
+                expect("earlier named values 0", undefined, values[0]);
+                expect("earlier named values 1", 2, values[1]);
+              });
+          }).
+          next(function () {
+            return Deferred.earlier({
+              foo: wait(0).next(function () {
+                return 1
+              }),
+              bar: wait(1).next(function () {
+                return 2
+              })
+            }).
+              next(function (values) {
+                print(uneval(values));
+                expect("earlier named values foo", 1, values.foo);
+                expect("earlier named values bar", undefined, values.bar);
+              });
+          }).
+          next(function () {
+            return Deferred.earlier({
+              foo: wait(1).next(function () {
+                return 1
+              }),
+              bar: wait(0).next(function () {
+                return 2
+              })
+            }).
+              next(function (values) {
+                print(uneval(values));
+                expect("earlier named values foo", undefined, values.foo);
+                expect("earlier named values bar", 2, values.bar);
+              });
+          }).
+          error(function (e) {
+            trace(e);
+            ng("Error on Tests", "", e);
+          });
       })//.
-//      next(function () {
-//        var a, b;
-//        return next(function () {
-//          function pow(x, n) {
-//            expect("child deferred chain", a._next, b._next);
-//            function _pow(n, r) {
-//              print(uneval([n, r]));
-//              if (n == 0) return r;
-//              return call(_pow, n - 1, x * r);
-//            }
-//
-//            return call(_pow, n, 1);
-//          }
-//
-//          a = this;
-//          b = call(pow, 2, 10);
-//          return b;
-//        }).
-//          next(function (r) {
-//            expect("pow calculate", 1024, r);
-//          }).
-//          error(function (e) {
-//            ng("Error on pow", "", e);
-//          });
-//      }).
-//      error(function (e) {
-//        ng("Error on Test Callback, Errorback chain", "", e);
-//      }).
-//      next(function () {
-//        msg("Utility Functions Tests::");
-//
-//        return next(function () {
-//          return wait(0).next(function (i) {
-//            ok("wait(0) called", "1000ms >", i);
-//          });
-//        }).
-//          next(function () {
-//          }).
-//          error(function (e) {
-//            ng("Error on wait Tests", "", e);
-//          }).
-//          next(function () {
-//            return call(function (test) {
-//              expect("call test1", 10, test);
-//              return call(function (t, u) {
-//                expect("call test2", 10, t);
-//                expect("call test2", 20, u);
-//              }, 10, 20);
-//            }, 10);
-//          }).
-//          next(function () {
-//            var t = 0;
-//            return loop(5,function (i) {
-//              expect("loop num", t++, i);
-//              /* dummy for expects
-//               * expect()
-//               * expect()
-//               * expect()
-//               * expect()
-//               */
-//              return "ok";
-//            }).next(function (r) {
-//                expect("loop num. result", "ok", r);
-//                expect("loop num. result", 5, t);
-//              });
-//          }).
-//          next(function () {
-//            var t = 0;
-//            return loop(2,function (i) {
-//              expect("loop num", t++, i);
-//              /* dummy for expects
-//               * expect()
-//               */
-//              return "ok";
-//            }).next(function (r) {
-//                expect("loop num. result", "ok", r);
-//                expect("loop num. result", 2, t);
-//              });
-//          }).
-//          next(function () {
-//            var t = 0;
-//            return loop(1,function (i) {
-//              expect("loop num", t++, i);
-//              return "ok";
-//            }).next(function (r) {
-//                expect("loop num. result", "ok", r);
-//                expect("loop num. result", 1, t);
-//              });
-//          }).
-//          next(function () {
-//            var t = 0;
-//            return loop(0,function (i) {
-//              t++;
-//            }).next(function () {
-//                expect("loop num 0 to 0. result", 0, t);
-//              });
-//          }).
-//          next(function () {
-//            var t = 0;
-//            return loop({begin: 0, end: 0},function (i) {
-//              t++;
-//            }).next(function () {
-//                expect("loop num begin:0 to end:0. result", 1, t);
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({end: 10, step: 1},function (n, o) {
-//              print(uneval(o));
-//              r.push(n);
-//              l.push(o.last);
-//              return r;
-//            }).next(function (r) {
-//                expect("loop end:10, step:1", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop end:10, step:1 last?", [false, false, false, false, false, false, false, false, false, false, true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({end: 10, step: 2},function (n, o) {
-//              print(uneval(o));
-//              l.push(o.last);
-//              for (var i = 0; i < o.step; i++) {
-//                r.push(n + i);
-//              }
-//              return r;
-//            }).next(function (r) {
-//                expect("loop end:10, step:2", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop end:10, step:2 last?", [false, false, false, false, false, true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({end: 10, step: 3},function (n, o) {
-//              print(uneval(o));
-//              l.push(o.last);
-//              for (var i = 0; i < o.step; i++) {
-//                r.push(n + i);
-//              }
-//              return r;
-//            }).next(function (r) {
-//                expect("loop end:10, step:3", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop end:10, step:3 last?", [false, false, false, true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({end: 10, step: 5},function (n, o) {
-//              print(uneval(o));
-//              l.push(o.last);
-//              for (var i = 0; i < o.step; i++) {
-//                r.push(n + i);
-//              }
-//              return r;
-//            }).next(function (r) {
-//                expect("loop end:10, step:5", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop end:10, step:5 last?", [false, false, true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({end: 10, step: 9},function (n, o) {
-//              print(uneval(o));
-//              l.push(o.last);
-//              for (var i = 0; i < o.step; i++) {
-//                r.push(n + i);
-//              }
-//              return r;
-//            }).next(function (r) {
-//                expect("loop end:10, step:9", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop end:10, step:9 last?", [false, true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({end: 10, step: 10},function (n, o) {
-//              print(uneval(o));
-//              l.push(o.last);
-//              for (var i = 0; i < o.step; i++) {
-//                r.push(n + i);
-//              }
-//              return r;
-//            }).next(function (r) {
-//                expect("loop end:10, step:10", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop end:10, step:10 last?", [false, true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({end: 10, step: 11},function (n, o) {
-//              print(uneval(o));
-//              l.push(o.last);
-//              for (var i = 0; i < o.step; i++) {
-//                r.push(n + i);
-//              }
-//              return r;
-//            }).next(function (r) {
-//                expect("loop end:10, step:11", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop end:10, step:11 last?", [true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            var l = [];
-//            return loop({begin: 1, end: 10, step: 3},function (n, o) {
-//              print(uneval(o));
-//              l.push(o.last);
-//              for (var i = 0; i < o.step; i++) {
-//                r.push(n + i);
-//              }
-//              return r;
-//            }).next(function (r) {
-//                expect("loop begin:1, end:10, step:3", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].join(), r.join());
-//                expect("loop begin:1, end:10, step:3 last?", [false, false, false, true].join(), l.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            return repeat(0,function (i) {
-//              r.push(i);
-//            }).
-//              next(function (ret) {
-//                expect("repeat 0 ret val", undefined, ret);
-//                expect("repeat 0", [].join(), r.join());
-//              });
-//          }).
-//          next(function () {
-//            var r = [];
-//            return repeat(10,function (i) {
-//              r.push(i);
-//            }).
-//              next(function (ret) {
-//                expect("repeat 10", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].join(), r.join());
-//              });
-//          }).
-//          next(function () {
-//            return parallel([]).
-//              next(function () {
-//                ok("parallel no values");
-//              });
-//          }).
-//          next(function () {
-//            return parallel([next(function () {
-//              return 0
-//            }), next(function () {
-//              return 1
-//            })]).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("parallel values 0", 0, values[0]);
-//                expect("parallel values 1", 1, values[1]);
-//              });
-//          }).
-//          next(function () {
-//            return parallel({foo: next(function () {
-//              return 0
-//            }), bar: next(function () {
-//              return 1
-//            })}).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("parallel named values foo", 0, values.foo);
-//                expect("parallel named values bar", 1, values.bar);
-//              });
-//          }).
-//          next(function () {
-//            return parallel(next(function () {
-//              return 0
-//            }), next(function () {
-//              return 1
-//            })).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("parallel values 0", 0, values[0]);
-//                expect("parallel values 1", 1, values[1]);
-//              });
-//          }).
-//          next(function () {
-//            return parallel([
-//              function () {
-//                return 0;
-//              },
-//              function () {
-//                return 1;
-//              }
-//            ]).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("parallel values 0", 0, values[0]);
-//                expect("parallel values 1", 1, values[1]);
-//              });
-//          }).
-//          next(function () {
-//            var d = parallel([
-//              function () {
-//                return 0;
-//              },
-//              function () {
-//                return 1;
-//              }
-//            ]);
-//
-//            d.cancel();
-//          }).
-//          next(function () {
-//            return Deferred.earlier([
-//                wait(0).next(function () {
-//                  return 1
-//                }),
-//                wait(1).next(function () {
-//                  return 2
-//                })
-//              ]).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("earlier named values 0", 1, values[0]);
-//                expect("earlier named values 1", undefined, values[1]);
-//              });
-//          }).
-//          next(function () {
-//            return Deferred.earlier([
-//                wait(1).next(function () {
-//                  return 1
-//                }),
-//                wait(0).next(function () {
-//                  return 2
-//                })
-//              ]).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("earlier named values 0", undefined, values[0]);
-//                expect("earlier named values 1", 2, values[1]);
-//              });
-//          }).
-//          next(function () {
-//            return Deferred.earlier(
-//                wait(1).next(function () {
-//                  return 1
-//                }),
-//                wait(0).next(function () {
-//                  return 2
-//                })
-//              ).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("earlier named values 0", undefined, values[0]);
-//                expect("earlier named values 1", 2, values[1]);
-//              });
-//          }).
-//          next(function () {
-//            return Deferred.earlier({
-//              foo: wait(0).next(function () {
-//                return 1
-//              }),
-//              bar: wait(1).next(function () {
-//                return 2
-//              })
-//            }).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("earlier named values foo", 1, values.foo);
-//                expect("earlier named values bar", undefined, values.bar);
-//              });
-//          }).
-//          next(function () {
-//            return Deferred.earlier({
-//              foo: wait(1).next(function () {
-//                return 1
-//              }),
-//              bar: wait(0).next(function () {
-//                return 2
-//              })
-//            }).
-//              next(function (values) {
-//                print(uneval(values));
-//                expect("earlier named values foo", undefined, values.foo);
-//                expect("earlier named values bar", 2, values.bar);
-//              });
-//          }).
-//          error(function (e) {
-//            alert(e);
-//            ng("Error on Tests", "", e);
-//          });
-//      }).
 //      next(function () {
 //        return Deferred.chain(
 //          function () {
