@@ -158,13 +158,25 @@ public class Deferred {
   }
 
   static public function loop(n:*, fun:Function):Deferred {
-    var o:Object = {
-      begin: n.begin || 0,
-      end  : (typeof n.end == "number") ? n.end : n - 1,
-      step : n.step || 1,
-      last : false,
-      prev : null
-    };
+    var o:Object
+    if (n is Number) {
+      o = {
+        begin: 0,
+        end: n - 1,
+        step: 1,
+        last: false,
+        prev: null
+      };
+    } else {
+      if (!(n.end is Number)) throw new TypeError("n.end isn't number");
+      o = {
+        begin: n.begin || 0,
+        end: n.end,
+        step: n.step || 1,
+        last: false,
+        prev: null
+      };
+    }
     var ret:*, step:int = o.step;
     return Deferred.next(function ():Deferred {
       function _loop(i:int):* {
@@ -199,7 +211,8 @@ public class Deferred {
       var t:Number = (new Date()).getTime();
       do {
         if (i >= n) return null;
-        /*ret = */fun(i++);
+        /*ret = */
+        fun(i++);
       } while ((new Date()).getTime() - t < 20);
       return Deferred.call(next);
     }
@@ -271,10 +284,10 @@ public class Deferred {
     var retry:Function = function ():void {
       var m:Deferred = funcDeferred(retryCount);
       m.
-        next(function (mes:*) {
+        next(function (mes:*):void {
           d.call(mes);
         }).
-        error(function (e:Error) {
+        error(function (e:Error):void {
           if (--retryCount <= 0) {
             d.fail(['retry failed', e]);
           } else {
@@ -312,7 +325,7 @@ public class Deferred {
     init();
   }
 
-  public function init() {
+  public function init():Deferred {
     _next = null;
     callback = {
       ok: Deferred.ok,
@@ -321,11 +334,11 @@ public class Deferred {
     return this;
   }
 
-  public function next(fun):Deferred {
+  public function next(fun:Function):Deferred {
     return _post("ok", fun);
   }
 
-  public function error(fun):Deferred {
+  public function error(fun:Function):Deferred {
     return _post("ng", fun);
   }
 
@@ -333,12 +346,12 @@ public class Deferred {
     return _fire("ok", val);
   }
 
-  public function fail(err):Deferred {
+  public function fail(err:*):Deferred {
     return _fire("ng", err);
   }
 
   public function cancel():Deferred {
-    if (canceller) {
+    if (canceller != null) {
       canceller();
     }
     return init();
@@ -354,15 +367,10 @@ public class Deferred {
     var next:String = "ok";
     try {
       value = callback[okng].call(this, value);
-    } catch(e:Error) {
-      next = "ng";
-      value = e;
-      if (onerror) onerror(e);
     } catch (e:*) {
-      e = new Error(e);
       next = "ng";
       value = e;
-      if (onerror) onerror(e);
+      if (onerror != null) onerror(e);
     }
     if (isDeferred(value)) {
       value._next = _next;
@@ -378,7 +386,7 @@ public class Deferred {
 internal class Arguments {
   public var args:Array;
 
-  public function Arguments(args) {
-    this.args = Array.prototype.slice.call(args, 0)
+  public function Arguments(...args:Array) {
+    this.args = args;
   }
 }
