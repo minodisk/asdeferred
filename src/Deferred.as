@@ -227,7 +227,6 @@ public class Deferred {
 //  Deferred.register("wait", Deferred.wait);
 
   static public function connect(funo:*, options:* = null, obj:Object = null):Function {
-    trace('arguments =', arguments);
     var target:*, func:Function;
     if (typeof options == "string") {
       target = funo;
@@ -238,7 +237,6 @@ public class Deferred {
       obj = options || {};
       target = obj.target;
     }
-    trace(func, target, obj);
 
     var partialArgs:Array = obj.args ? obj.args : [];
     var callbackArgIndex:int = (obj.ok != null) ? obj.ok : obj.args ? obj.args.length : -1;
@@ -246,36 +244,27 @@ public class Deferred {
 
     return function (...args:Array):Deferred {
       var d:Deferred = new Deferred().next(function (args:Arguments):void {
-        trace('-', args);
         var next:Function = this._next.callback.ok;
         this._next.callback.ok = function ():* {
           return next.apply(this, args.args);
         };
       });
 
-		trace('partialArgs =', obj.args, '->', partialArgs);
       args = partialArgs.concat(args);
-      trace('--', args);
       if (!(isFinite(callbackArgIndex) && callbackArgIndex !== -1)) {
         callbackArgIndex = args.length;
       }
       var callback:Function = function ():void {
         d.call(new Arguments(arguments));
       };
-      trace('--', args);
       args.splice(callbackArgIndex, 0, callback);
-      trace('--', args);
       if (isFinite(errorbackArgIndex) && errorbackArgIndex !== -1) {
         var errorback:Function = function ():void {
           d.fail(arguments);
         };
-        trace(errorbackArgIndex, args.length);
         args.splice(errorbackArgIndex, 0, errorback);
-        trace(args.length);
       }
-      trace('--', args);
       Deferred.next(function ():void {
-        trace('---', args);
         func.apply(target, args);
       });
       return d;
