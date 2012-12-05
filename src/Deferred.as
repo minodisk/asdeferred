@@ -43,26 +43,31 @@ public class Deferred {
   static public function chain(...args:Array):Deferred {
     var chain:Deferred = Deferred.next();
     for (var i:int = 0, len:int = args.length; i < len; i++) (function (obj:*):void {
-      switch (typeof obj) {
-        case "function":
-          var name:String = null;
-          try {
-            name = obj.toString().match(/^\s*function\s+([^\s()]+)/)[1];
-          } catch (e:Error) {
-          }
-          if (name != "error") {
+      if (obj is ErrorFunction) {
+        chain = chain.error((obj as ErrorFunction).fun);
+      } else {
+        switch (typeof obj) {
+          case "function":
+            // AS では関数名を取得することができない
+//          var name:String = null;
+//          try {
+//            name = obj.toString().match(/^\s*function\s+([^\s()]+)/)[1];
+//          } catch (e:Error) {
+//          }
+//          if (name != "error") {
             chain = chain.next(obj);
-          } else {
-            chain = chain.error(obj);
-          }
-          break;
-        case "object":
-          chain = chain.next(function ():Deferred {
-            return Deferred.parallel(obj);
-          });
-          break;
-        default:
-          throw "unknown type in process chains";
+//          } else {
+//            chain = chain.error(obj);
+//          }
+            break;
+          case "object":
+            chain = chain.next(function ():Deferred {
+              return Deferred.parallel(obj);
+            });
+            break;
+          default:
+            throw "unknown type in process chains";
+        }
       }
     })(args[i]);
     return chain;
@@ -151,20 +156,20 @@ public class Deferred {
     var o:Object
     if (n is Number) {
       o = {
-        begin: 0,
-        end: n - 1,
-        step: 1,
-        last: false,
-        prev: null
+        begin:0,
+        end:n - 1,
+        step:1,
+        last:false,
+        prev:null
       };
     } else {
       if (!(n.end is Number)) throw new TypeError("n.end isn't number");
       o = {
-        begin: n.begin || 0,
-        end: n.end,
-        step: n.step || 1,
-        last: false,
-        prev: null
+        begin:n.begin || 0,
+        end:n.end,
+        step:n.step || 1,
+        last:false,
+        prev:null
       };
     }
     var ret:*, step:int = o.step;
@@ -221,8 +226,8 @@ public class Deferred {
 //  Deferred.register("loop", Deferred.loop);
 //  Deferred.register("wait", Deferred.wait);
 
-  static public function connect(funo:*, options:*):Function {
-    var target:Object, func:Function, obj:Object;
+  static public function connect(funo:*, options:* = null, obj:Object = null):Function {
+    var target:Object, func:Function;
     if (typeof arguments[1] == "string") {
       target = arguments[0];
       func = target[arguments[1]];
@@ -301,6 +306,10 @@ public class Deferred {
     return Deferred;
   }
 
+  static public function errorFunction(fun:Function):ErrorFunction {
+    return new ErrorFunction(fun);
+  }
+
 
   public var loop:Function = Deferred.loop;
   public var wait:Function = Deferred.wait;
@@ -318,8 +327,8 @@ public class Deferred {
   public function init():Deferred {
     _next = null;
     callback = {
-      ok: Deferred.ok,
-      ng: Deferred.ng
+      ok:Deferred.ok,
+      ng:Deferred.ng
     };
     return this;
   }
@@ -378,5 +387,13 @@ internal class Arguments {
 
   public function Arguments(...args:Array) {
     this.args = args;
+  }
+}
+
+internal class ErrorFunction {
+  public var fun:Function;
+
+  public function ErrorFunction(fun:Function) {
+    this.fun = fun;
   }
 }

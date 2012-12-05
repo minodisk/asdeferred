@@ -758,9 +758,10 @@ public class Test extends Sprite {
             ok("called");
             throw "error";
           },
-          function error(e) {
+          // AS では関数名を取得することができないので ErrorFunction インスタンスのファクトリメソッドを使うことにする
+          errorFunction(function error(e) {
             ok("error called: " + e);
-          },
+          }),
           [
             function () {
               ok("callled");
@@ -791,254 +792,255 @@ public class Test extends Sprite {
             expect("object is run in parallel", result.foo, 1);
             expect("object is run in parallel", result.bar, 2);
           },
-          function error(e) {
+          // AS では関数名を取得することができないので ErrorFunction インスタンスのファクトリメソッドを使うことにする
+          errorFunction(function error(e) {
             ng(e);
-          }
+          })
         );
+      }).
+      next(function () {
+        msg("Connect Tests::");
+        return next(function () {
+          var f = function (arg1, arg2, callback) {
+            callback(arg1 + arg2);
+          }
+          var fd = Deferred.connect(f, { ok: 2 });
+          return fd(2, 3).next(function (r) {
+            expect('connect f 2 arguments', 5, r);
+          });
+        }).
+          next(function () {
+            var obj = {
+              f: function (arg1, arg2, callback) {
+                callback(this.plus(arg1, arg2));
+              },
+
+              plus: function (a, b) {
+                return a + b;
+              }
+            };
+            var fd = Deferred.connect(obj, "f", { ok: 2 });
+            return fd(2, 3).next(function (r) {
+              expect('connect f target, "method"', 5, r);
+            });
+          }).
+          next(function () {
+            var obj = {
+              f: function (arg1, arg2, callback) {
+                callback(this.plus(arg1, arg2));
+              },
+
+              plus: function (a, b) {
+                return a + b;
+              }
+            };
+            var fd = Deferred.connect(obj, "f");
+            return fd(2, 3).next(function (r) {
+              expect('connect f target, "method"', 5, r);
+            });
+          }).
+          next(function () {
+            var f = function (arg1, arg2, callback) {
+              callback(arg1 + arg2);
+            }
+            var fd = Deferred.connect(f, { args: [2, 3] });
+
+            return fd().next(function (r) {
+              expect('connect f bind args', 5, r);
+            });
+          }).
+          next(function () {
+            var f = function (arg1, arg2, callback) {
+              callback(arg1 + arg2);
+            }
+            var fd = Deferred.connect(f, { args: [2, 3] });
+
+            return fd(undefined).next(function (r) {
+              expect('connect f bind args', 5, r);
+            });
+          }).
+          next(function () {
+            var f = function (arg1, arg2, arg3, callback) {
+              callback(arg1 + arg2 + arg3);
+            }
+            var fd = Deferred.connect(f, { ok: 3, args: [2, 3] });
+
+            return fd(5).next(function (r) {
+              expect('connect f bind args', 10, r);
+            });
+          }).
+          next(function () {
+            var obj = {
+              f: function (arg1, arg2, callback) {
+                callback(this.plus(arg1, arg2));
+              },
+
+              plus: function (a, b) {
+                return a + b;
+              }
+            };
+            var fd = Deferred.connect(obj, "f", { args: [2, 3] });
+            return fd().next(function (r) {
+              expect('connect f bind args 2', 5, r);
+            });
+          }).
+          next(function () {
+            var timeout = Deferred.connect(function (n, cb) {
+              setTimeout(cb, n);
+            });
+
+            return timeout(1).next(function () {
+              ok('connect setTimeout');
+            });
+          }).
+          next(function () {
+            var timeout = Deferred.connect(function (n, cb) {
+              setTimeout(cb, n);
+            });
+
+            var seq = [0];
+            return timeout(1).next(function () {
+              expect('sequence of connect', '0', seq.join(','));
+              seq.push(1);
+              return next(function () {
+                expect('sequence of connect', '0,1', seq.join(','));
+                seq.push(2);
+              });
+            }).
+              next(function () {
+                expect('sequence of connect', '0,1,2', seq.join(','));
+              });
+          }).
+          next(function () {
+            var f = Deferred.connect(function (cb) {
+              setTimeout(function () {
+                cb(0, 1, 2);
+              }, 0);
+            });
+            return f().next(function (a, b, c) {
+              expect('connected function pass multiple arguments to callback', '0,1,2', [a, b, c].join(','));
+              return f();
+            }).
+              next(function (a, b, c) {
+                expect('connected function pass multiple arguments to callback (child)', '0,1,2', [a, b, c].join(','));
+              });
+          });
+      }).
+      next(function () {
+        var f = function (arg1, arg2, callback) {
+          setTimeout(function () {
+            callback(arg1, arg2);
+          }, 10);
+        }
+        var fd = Deferred.connect(f, { ok: 2 });
+        return fd(2, 3).next(function (r0, r1) {
+          expect('connect f callback multiple values', 2, r0);
+          expect('connect f callback multiple values', 3, r1);
+        });
+      }).
+      next(function () {
+        var f = function (arg1, arg2, callback) {
+          setTimeout(function () {
+            callback(arg1 + arg2);
+          }, 10);
+        }
+        var fd = Deferred.connect(f);
+        return fd(2, 3).next(function (r) {
+          expect('connect unset callbackArgIndex', 5, r);
+        });
+      }).
+      next(function () {
+        var f = function (arg1, arg2, callback, errorback, arg3) {
+          setTimeout(function () {
+            errorback(arg1, arg2, arg3);
+          }, 10);
+        }
+        var fd = Deferred.connect(f, { ok: 2, ng: 3 });
+        return fd(2, 3, 4).error(function (r) {
+          expect('connect f errorback', 2, r[0]);
+          expect('connect f errorback', 3, r[1]);
+          expect('connect f errorback', 4, r[2]);
+        });
+      }).
+      next(function () {
+        var _this = new Object();
+        var f = function (callback) {
+          var self = this;
+          setTimeout(function () {
+            callback(_this === self);
+          }, 10);
+        };
+        var fd = Deferred.connect(f, { target: _this, ok: 0 });
+        return fd().next(function (r) {
+          expect("connect this", true, r);
+        });
+      }).
+      next(function () {
+        var count = 0;
+        var successThird = function () {
+          var deferred = new Deferred;
+          setTimeout(function () {
+            var c = ++count;
+            if (c == 3) {
+              deferred.call('third');
+            } else {
+              deferred.fail('no third');
+            }
+          }, 10);
+          return deferred;
+        }
+
+        return next(function () {
+          return Deferred.retry(4, successThird).next(function (mes) {
+            expect('retry third called', 'third', mes);
+            expect('retry third called', 3, count);
+            count = 0;
+          }).
+            error(function (e) {
+              ng(e);
+            });
+        }).
+          next(function () {
+            return Deferred.retry(3, successThird).next(function (mes) {
+              expect('retry third called', 'third', mes);
+              expect('retry third called', 3, count);
+              count = 0;
+            }).
+              error(function (e) {
+                ng(e);
+              });
+          }).
+          next(function () {
+            return Deferred.retry(2, successThird).next(function (e) {
+              ng(e);
+            }).
+              error(function (mes) {
+                ok('retry over');
+              });
+          }).
+          error(function (e) {
+            ng(e);
+          });
+      }).
+      next(function () {
+        msg("Stack over flow test: check not waste stack.");
+        if (skip("too heavy", 1)) return;
+
+        var num = 10001;
+        return loop(num,function (n) {
+          if (n % 500 == 0) print(n);
+          return n;
+        }).
+          next(function (r) {
+            expect("Long long loop", num - 1, r);
+          }).
+          error(function (e) {
+            ng(e);
+          });
+      }).
+      next(function () {
+        msg("Done Main.");
       })//.
-//      next(function () {
-//        msg("Connect Tests::");
-//        return next(function () {
-//          var f = function (arg1, arg2, callback) {
-//            callback(arg1 + arg2);
-//          }
-//          var fd = Deferred.connect(f, { ok: 2 });
-//          return fd(2, 3).next(function (r) {
-//            expect('connect f 2 arguments', 5, r);
-//          });
-//        }).
-//          next(function () {
-//            var obj = {
-//              f: function (arg1, arg2, callback) {
-//                callback(this.plus(arg1, arg2));
-//              },
-//
-//              plus: function (a, b) {
-//                return a + b;
-//              }
-//            };
-//            var fd = Deferred.connect(obj, "f", { ok: 2 });
-//            return fd(2, 3).next(function (r) {
-//              expect('connect f target, "method"', 5, r);
-//            });
-//          }).
-//          next(function () {
-//            var obj = {
-//              f: function (arg1, arg2, callback) {
-//                callback(this.plus(arg1, arg2));
-//              },
-//
-//              plus: function (a, b) {
-//                return a + b;
-//              }
-//            };
-//            var fd = Deferred.connect(obj, "f");
-//            return fd(2, 3).next(function (r) {
-//              expect('connect f target, "method"', 5, r);
-//            });
-//          }).
-//          next(function () {
-//            var f = function (arg1, arg2, callback) {
-//              callback(arg1 + arg2);
-//            }
-//            var fd = Deferred.connect(f, { args: [2, 3] });
-//
-//            return fd().next(function (r) {
-//              expect('connect f bind args', 5, r);
-//            });
-//          }).
-//          next(function () {
-//            var f = function (arg1, arg2, callback) {
-//              callback(arg1 + arg2);
-//            }
-//            var fd = Deferred.connect(f, { args: [2, 3] });
-//
-//            return fd(undefined).next(function (r) {
-//              expect('connect f bind args', 5, r);
-//            });
-//          }).
-//          next(function () {
-//            var f = function (arg1, arg2, arg3, callback) {
-//              callback(arg1 + arg2 + arg3);
-//            }
-//            var fd = Deferred.connect(f, { ok: 3, args: [2, 3] });
-//
-//            return fd(5).next(function (r) {
-//              expect('connect f bind args', 10, r);
-//            });
-//          }).
-//          next(function () {
-//            var obj = {
-//              f: function (arg1, arg2, callback) {
-//                callback(this.plus(arg1, arg2));
-//              },
-//
-//              plus: function (a, b) {
-//                return a + b;
-//              }
-//            };
-//            var fd = Deferred.connect(obj, "f", { args: [2, 3] });
-//            return fd().next(function (r) {
-//              expect('connect f bind args 2', 5, r);
-//            });
-//          }).
-//          next(function () {
-//            var timeout = Deferred.connect(function (n, cb) {
-//              setTimeout(cb, n);
-//            });
-//
-//            return timeout(1).next(function () {
-//              ok('connect setTimeout');
-//            });
-//          }).
-//          next(function () {
-//            var timeout = Deferred.connect(function (n, cb) {
-//              setTimeout(cb, n);
-//            });
-//
-//            var seq = [0];
-//            return timeout(1).next(function () {
-//              expect('sequence of connect', '0', seq.join(','));
-//              seq.push(1);
-//              return next(function () {
-//                expect('sequence of connect', '0,1', seq.join(','));
-//                seq.push(2);
-//              });
-//            }).
-//              next(function () {
-//                expect('sequence of connect', '0,1,2', seq.join(','));
-//              });
-//          }).
-//          next(function () {
-//            var f = Deferred.connect(function (cb) {
-//              setTimeout(function () {
-//                cb(0, 1, 2);
-//              }, 0);
-//            });
-//            return f().next(function (a, b, c) {
-//              expect('connected function pass multiple arguments to callback', '0,1,2', [a, b, c].join(','));
-//              return f();
-//            }).
-//              next(function (a, b, c) {
-//                expect('connected function pass multiple arguments to callback (child)', '0,1,2', [a, b, c].join(','));
-//              });
-//          });
-//      }).
-//      next(function () {
-//        var f = function (arg1, arg2, callback) {
-//          setTimeout(function () {
-//            callback(arg1, arg2);
-//          }, 10);
-//        }
-//        var fd = Deferred.connect(f, { ok: 2 });
-//        return fd(2, 3).next(function (r0, r1) {
-//          expect('connect f callback multiple values', 2, r0);
-//          expect('connect f callback multiple values', 3, r1);
-//        });
-//      }).
-//      next(function () {
-//        var f = function (arg1, arg2, callback) {
-//          setTimeout(function () {
-//            callback(arg1 + arg2);
-//          }, 10);
-//        }
-//        var fd = Deferred.connect(f);
-//        return fd(2, 3).next(function (r) {
-//          expect('connect unset callbackArgIndex', 5, r);
-//        });
-//      }).
-//      next(function () {
-//        var f = function (arg1, arg2, callback, errorback, arg3) {
-//          setTimeout(function () {
-//            errorback(arg1, arg2, arg3);
-//          }, 10);
-//        }
-//        var fd = Deferred.connect(f, { ok: 2, ng: 3 });
-//        return fd(2, 3, 4).error(function (r) {
-//          expect('connect f errorback', 2, r[0]);
-//          expect('connect f errorback', 3, r[1]);
-//          expect('connect f errorback', 4, r[2]);
-//        });
-//      }).
-//      next(function () {
-//        var _this = new Object();
-//        var f = function (callback) {
-//          var self = this;
-//          setTimeout(function () {
-//            callback(_this === self);
-//          }, 10);
-//        };
-//        var fd = Deferred.connect(f, { target: _this, ok: 0 });
-//        return fd().next(function (r) {
-//          expect("connect this", true, r);
-//        });
-//      }).
-//      next(function () {
-//        var count = 0;
-//        var successThird = function () {
-//          var deferred = new Deferred;
-//          setTimeout(function () {
-//            var c = ++count;
-//            if (c == 3) {
-//              deferred.call('third');
-//            } else {
-//              deferred.fail('no third');
-//            }
-//          }, 10);
-//          return deferred;
-//        }
-//
-//        return next(function () {
-//          return Deferred.retry(4, successThird).next(function (mes) {
-//            expect('retry third called', 'third', mes);
-//            expect('retry third called', 3, count);
-//            count = 0;
-//          }).
-//            error(function (e) {
-//              ng(e);
-//            });
-//        }).
-//          next(function () {
-//            return Deferred.retry(3, successThird).next(function (mes) {
-//              expect('retry third called', 'third', mes);
-//              expect('retry third called', 3, count);
-//              count = 0;
-//            }).
-//              error(function (e) {
-//                ng(e);
-//              });
-//          }).
-//          next(function () {
-//            return Deferred.retry(2, successThird).next(function (e) {
-//              ng(e);
-//            }).
-//              error(function (mes) {
-//                ok(true, 'retry over');
-//              });
-//          }).
-//          error(function (e) {
-//            ng(e);
-//          });
-//      }).
-//      next(function () {
-//        msg("Stack over flow test: check not waste stack.");
-//        if (skip("too heavy", 1)) return;
-//
-//        var num = 10001;
-//        return loop(num,function (n) {
-//          if (n % 500 == 0) print(n);
-//          return n;
-//        }).
-//          next(function (r) {
-//            expect("Long long loop", num - 1, r);
-//          }).
-//          error(function (e) {
-//            ng(e);
-//          });
-//      }).
-//      next(function () {
-//        msg("Done Main.");
-//      }).
 //      next(function () {
 //        msg("jQuery binding test")
 //        if (Global.navigator && !/Rhino/.test(Global.navigator.userAgent)) {
