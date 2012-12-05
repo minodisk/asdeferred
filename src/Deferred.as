@@ -251,14 +251,14 @@ public class Deferred {
       });
 
       args = partialArgs.concat(args);
-      if (!(isFinite(callbackArgIndex) && callbackArgIndex !== -1)) {
+      if (callbackArgIndex === -1) {
         callbackArgIndex = args.length;
       }
       var callback:Function = function ():void {
         d.call(new Arguments(arguments));
       };
       args.splice(callbackArgIndex, 0, callback);
-      if (isFinite(errorbackArgIndex) && errorbackArgIndex !== -1) {
+      if (errorbackArgIndex !== -1) {
         var errorback:Function = function ():void {
           d.fail(arguments);
         };
@@ -383,9 +383,9 @@ public class Deferred {
 }
 
 internal class Arguments {
-  public var args:Array;
+  public var args:Object;
 
-  public function Arguments(...args:Array) {
+  public function Arguments(args:Object) {
     this.args = args;
   }
 }
