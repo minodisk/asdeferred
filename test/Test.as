@@ -3,6 +3,7 @@ import flash.display.Sprite;
 import flash.events.Event;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
+import flash.system.fscommand;
 import flash.utils.setTimeout;
 
 public class Test extends Sprite {
@@ -34,6 +35,7 @@ public class Test extends Sprite {
       out.push(["NG Test::", msg, expect, result].join("\n"));
       trace(out.join(""));
 //      process.exit(1);
+      exit();
     } else {
       testfuns.pop();
       out.push(" ", color(32, "ok"));
@@ -456,7 +458,7 @@ public class Test extends Sprite {
           }).
           next(function () {
             var t = 0;
-            return loop({begin: 0, end: 0},function (i) {
+            return loop({begin:0, end:0},function (i) {
               t++;
             }).next(function () {
                 expect("loop num begin:0 to end:0. result", 1, t);
@@ -465,7 +467,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({end: 10, step: 1},function (n, o) {
+            return loop({end:10, step:1},function (n, o) {
               print(uneval(o));
               r.push(n);
               l.push(o.last);
@@ -478,7 +480,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({end: 10, step: 2},function (n, o) {
+            return loop({end:10, step:2},function (n, o) {
               print(uneval(o));
               l.push(o.last);
               for (var i = 0; i < o.step; i++) {
@@ -493,7 +495,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({end: 10, step: 3},function (n, o) {
+            return loop({end:10, step:3},function (n, o) {
               print(uneval(o));
               l.push(o.last);
               for (var i = 0; i < o.step; i++) {
@@ -508,7 +510,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({end: 10, step: 5},function (n, o) {
+            return loop({end:10, step:5},function (n, o) {
               print(uneval(o));
               l.push(o.last);
               for (var i = 0; i < o.step; i++) {
@@ -523,7 +525,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({end: 10, step: 9},function (n, o) {
+            return loop({end:10, step:9},function (n, o) {
               print(uneval(o));
               l.push(o.last);
               for (var i = 0; i < o.step; i++) {
@@ -538,7 +540,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({end: 10, step: 10},function (n, o) {
+            return loop({end:10, step:10},function (n, o) {
               print(uneval(o));
               l.push(o.last);
               for (var i = 0; i < o.step; i++) {
@@ -553,7 +555,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({end: 10, step: 11},function (n, o) {
+            return loop({end:10, step:11},function (n, o) {
               print(uneval(o));
               l.push(o.last);
               for (var i = 0; i < o.step; i++) {
@@ -568,7 +570,7 @@ public class Test extends Sprite {
           next(function () {
             var r = [];
             var l = [];
-            return loop({begin: 1, end: 10, step: 3},function (n, o) {
+            return loop({begin:1, end:10, step:3},function (n, o) {
               print(uneval(o));
               l.push(o.last);
               for (var i = 0; i < o.step; i++) {
@@ -618,9 +620,9 @@ public class Test extends Sprite {
               });
           }).
           next(function () {
-            return parallel({foo: next(function () {
+            return parallel({foo:next(function () {
               return 0
-            }), bar: next(function () {
+            }), bar:next(function () {
               return 1
             })}).
               next(function (values) {
@@ -670,13 +672,13 @@ public class Test extends Sprite {
           }).
           next(function () {
             return Deferred.earlier([
-                wait(0).next(function () {
-                  return 1
-                }),
-                wait(1).next(function () {
-                  return 2
-                })
-              ]).
+              wait(0).next(function () {
+                return 1
+              }),
+              wait(1).next(function () {
+                return 2
+              })
+            ]).
               next(function (values) {
                 print(uneval(values));
                 expect("earlier named values 0", 1, values[0]);
@@ -685,13 +687,13 @@ public class Test extends Sprite {
           }).
           next(function () {
             return Deferred.earlier([
-                wait(1).next(function () {
-                  return 1
-                }),
-                wait(0).next(function () {
-                  return 2
-                })
-              ]).
+              wait(1).next(function () {
+                return 1
+              }),
+              wait(0).next(function () {
+                return 2
+              })
+            ]).
               next(function (values) {
                 print(uneval(values));
                 expect("earlier named values 0", undefined, values[0]);
@@ -700,13 +702,13 @@ public class Test extends Sprite {
           }).
           next(function () {
             return Deferred.earlier(
-                wait(1).next(function () {
-                  return 1
-                }),
-                wait(0).next(function () {
-                  return 2
-                })
-              ).
+              wait(1).next(function () {
+                return 1
+              }),
+              wait(0).next(function () {
+                return 2
+              })
+            ).
               next(function (values) {
                 print(uneval(values));
                 expect("earlier named values 0", undefined, values[0]);
@@ -715,10 +717,10 @@ public class Test extends Sprite {
           }).
           next(function () {
             return Deferred.earlier({
-              foo: wait(0).next(function () {
+              foo:wait(0).next(function () {
                 return 1
               }),
-              bar: wait(1).next(function () {
+              bar:wait(1).next(function () {
                 return 2
               })
             }).
@@ -730,10 +732,10 @@ public class Test extends Sprite {
           }).
           next(function () {
             return Deferred.earlier({
-              foo: wait(1).next(function () {
+              foo:wait(1).next(function () {
                 return 1
               }),
-              bar: wait(0).next(function () {
+              bar:wait(0).next(function () {
                 return 2
               })
             }).
@@ -781,10 +783,10 @@ public class Test extends Sprite {
             expect("array is run in parallel", result[1], 2);
           },
           {
-            foo: function () {
+            foo:function () {
               return 1
             },
-            bar: function () {
+            bar:function () {
               return 2
             }
           },
@@ -804,33 +806,33 @@ public class Test extends Sprite {
           var f = function (arg1, arg2, callback) {
             callback(arg1 + arg2);
           }
-          var fd = Deferred.connect(f, { ok: 2 });
+          var fd = Deferred.connect(f, { ok:2 });
           return fd(2, 3).next(function (r) {
             expect('connect f 2 arguments', 5, r);
           });
         }).
           next(function () {
             var obj = {
-              f: function (arg1, arg2, callback) {
+              f:function (arg1, arg2, callback) {
                 callback(this.plus(arg1, arg2));
               },
 
-              plus: function (a, b) {
+              plus:function (a, b) {
                 return a + b;
               }
             };
-            var fd = Deferred.connect(obj, "f", { ok: 2 });
+            var fd = Deferred.connect(obj, "f", { ok:2 });
             return fd(2, 3).next(function (r) {
               expect('connect f target, "method"', 5, r);
             });
           }).
           next(function () {
             var obj = {
-              f: function (arg1, arg2, callback) {
+              f:function (arg1, arg2, callback) {
                 callback(this.plus(arg1, arg2));
               },
 
-              plus: function (a, b) {
+              plus:function (a, b) {
                 return a + b;
               }
             };
@@ -843,7 +845,7 @@ public class Test extends Sprite {
             var f = function (arg1, arg2, callback) {
               callback(arg1 + arg2);
             }
-            var fd = Deferred.connect(f, { args: [2, 3] });
+            var fd = Deferred.connect(f, { args:[2, 3] });
 
             return fd().next(function (r) {
               expect('connect f bind args', 5, r);
@@ -853,7 +855,7 @@ public class Test extends Sprite {
             var f = function (arg1, arg2, callback) {
               callback(arg1 + arg2);
             }
-            var fd = Deferred.connect(f, { args: [2, 3] });
+            var fd = Deferred.connect(f, { args:[2, 3] });
 
             return fd(undefined).next(function (r) {
               expect('connect f bind args', 5, r);
@@ -863,7 +865,7 @@ public class Test extends Sprite {
             var f = function (arg1, arg2, arg3, callback) {
               callback(arg1 + arg2 + arg3);
             }
-            var fd = Deferred.connect(f, { ok: 3, args: [2, 3] });
+            var fd = Deferred.connect(f, { ok:3, args:[2, 3] });
 
             return fd(5).next(function (r) {
               expect('connect f bind args', 10, r);
@@ -871,15 +873,15 @@ public class Test extends Sprite {
           }).
           next(function () {
             var obj = {
-              f: function (arg1, arg2, callback) {
+              f:function (arg1, arg2, callback) {
                 callback(this.plus(arg1, arg2));
               },
 
-              plus: function (a, b) {
+              plus:function (a, b) {
                 return a + b;
               }
             };
-            var fd = Deferred.connect(obj, "f", { args: [2, 3] });
+            var fd = Deferred.connect(obj, "f", { args:[2, 3] });
             return fd().next(function (r) {
               expect('connect f bind args 2', 5, r);
             });
@@ -918,10 +920,12 @@ public class Test extends Sprite {
               }, 0);
             });
             return f().next(function (a, b, c) {
+              trace('->', a,',',b,',',c);
               expect('connected function pass multiple arguments to callback', '0,1,2', [a, b, c].join(','));
               return f();
             }).
               next(function (a, b, c) {
+                trace('->', a,',',b,',',c);
                 expect('connected function pass multiple arguments to callback (child)', '0,1,2', [a, b, c].join(','));
               });
           });
@@ -932,7 +936,7 @@ public class Test extends Sprite {
             callback(arg1, arg2);
           }, 10);
         }
-        var fd = Deferred.connect(f, { ok: 2 });
+        var fd = Deferred.connect(f, { ok:2 });
         return fd(2, 3).next(function (r0, r1) {
           expect('connect f callback multiple values', 2, r0);
           expect('connect f callback multiple values', 3, r1);
@@ -955,7 +959,7 @@ public class Test extends Sprite {
             errorback(arg1, arg2, arg3);
           }, 10);
         }
-        var fd = Deferred.connect(f, { ok: 2, ng: 3 });
+        var fd = Deferred.connect(f, { ok:2, ng:3 });
         return fd(2, 3, 4).error(function (r) {
           expect('connect f errorback', 2, r[0]);
           expect('connect f errorback', 3, r[1]);
@@ -970,7 +974,7 @@ public class Test extends Sprite {
             callback(_this === self);
           }, 10);
         };
-        var fd = Deferred.connect(f, { target: _this, ok: 0 });
+        var fd = Deferred.connect(f, { target:_this, ok:0 });
         return fd().next(function (r) {
           expect("connect this", true, r);
         });
@@ -1040,122 +1044,133 @@ public class Test extends Sprite {
       }).
       next(function () {
         msg("Done Main.");
-      })//.
-//      next(function () {
-//        msg("jQuery binding test")
-//        if (Global.navigator && !/Rhino/.test(Global.navigator.userAgent)) {
-//          return next(function () {
-//            expect("$.ajax#toJSDeferred() should return deferred", true, $.ajax({ url: "./test.html" }).toJSDeferred() instanceof Deferred);
-//            expect("$.get#toJSDeferred() should return deferred", true, $.get("./test.html").toJSDeferred()           instanceof Deferred);
-//            expect("$.post#toJSDeferred() should return deferred", true, $.post("./test.html").toJSDeferred()          instanceof Deferred);
-//            expect("$.getJSON#toJSDeferred() should return deferred", true, $.getJSON("./test.html").toJSDeferred()       instanceof Deferred);
-//            expect("Deferred()#toJSDeferred() should return deferred", true, $.Deferred().toJSDeferred()       instanceof Deferred);
-//
-//            expect("$.ajax should implement next()", true, !!$.ajax({ url: "./test.html" }).next);
-//            expect("$.ajax should implement error()", true, !!$.ajax({ url: "./test.html" }).error);
-//            expect("$.Deferred should implement next()", true, !!$.Deferred().next);
-//            expect("$.Deferred should implement error()", true, !!$.Deferred().error);
-//          }).
-//            next(function () {
-//              return $.ajax({
-//                url: "./test.html",
-//                success: function () {
-//                  ok("$.ajax#success 1");
-//                },
-//                error: function () {
-//                  ng("$.ajax#success 1");
-//                }
-//              }).
-//                next(function () {
-//                  ok("$.ajax#success 2");
-//                }).
-//                error(function (e) {
-//                  ng("$.ajax#success 2");
-//                });
-//            }).
-//            next(function () {
-//              return $.ajax({
-//                url: "error-404" + Math.random(),
-//                success: function () {
-//                  ng("$.ajax#error 1");
-//                },
-//                error: function () {
-//                  ok("$.ajax#error 1", "You may see error on console but it is correct.");
-//                }
-//              }).
-//                next(function () {
-//                  ng("$.ajax#error 2");
-//                }).
-//                error(function (e) {
-//                  ok("$.ajax#error 2");
-//                });
-//            }).
-//            next(function () {
-//              return next(function () {
-//                return $.get("./test.html");
-//              }).
-//                next(function () {
-//                  ok("$.get#success");
-//                }).
-//                error(function (e) {
-//                  ng("$.get#success");
-//                });
-//            }).
-//            next(function () {
-//              return next(function () {
-//                return $(document.body).fadeTo(100, 0).fadeTo(100, 1).promise().next(function () {
-//                  ok("promise()");
-//                });
-//              }).
-//                error(function (e) {
-//                  ng("promise()");
-//                });
-//            }).
-//            next(function () {
-//              return next(function () {
-//                var d = $.Deferred();
-//                setTimeout(function () {
-//                  d.resolve('ok');
-//                }, 10);
-//                return d;
-//              }).
-//                next(function (e) {
-//                  ok("$.Deferred " + e);
-//                }).
-//                error(function (e) {
-//                  ng("$.Deferred");
-//                });
-//            }).
-//            error(function (e) {
-//              ng("Error on jQuery Test:", "", e);
-//            });
-//        } else {
-//          skip("Not in browser", 16);
-//        }
-//        return null;
-//      }).
-//      next(function () {
-//        msg("Canceling Test:");
-//        return next(function () {
-//          return next(function () {
-//            msg("Calceling... No more tests below...");
-//            ok("Done");
-//            this.cancel();
-//          }).
-//            next(function () {
-//              ng("Must not be called!! calceled");
-//            });
-//        });
-//      }).
-//      next(function () {
-//        ng("Must not be called!! calceled");
-//      }).
-//      error(function (e) {
-//        ng(e);
-//      });
+      }).
+      next(function () {
+        msg("jQuery binding test")
+        var Global = {}, $, document;
+        if (Global.navigator && !/Rhino/.test(Global.navigator.userAgent)) {
+          return next(function () {
+            expect("$.ajax#toJSDeferred() should return deferred", true, $.ajax({ url:"./test.html" }).toJSDeferred() instanceof Deferred);
+            expect("$.get#toJSDeferred() should return deferred", true, $.get("./test.html").toJSDeferred()           instanceof Deferred);
+            expect("$.post#toJSDeferred() should return deferred", true, $.post("./test.html").toJSDeferred()          instanceof Deferred);
+            expect("$.getJSON#toJSDeferred() should return deferred", true, $.getJSON("./test.html").toJSDeferred()       instanceof Deferred);
+            expect("Deferred()#toJSDeferred() should return deferred", true, $.Deferred().toJSDeferred()       instanceof Deferred);
+
+            expect("$.ajax should implement next()", true, !!$.ajax({ url:"./test.html" }).next);
+            expect("$.ajax should implement error()", true, !!$.ajax({ url:"./test.html" }).error);
+            expect("$.Deferred should implement next()", true, !!$.Deferred().next);
+            expect("$.Deferred should implement error()", true, !!$.Deferred().error);
+          }).
+            next(function () {
+              return $.ajax({
+                url:"./test.html",
+                success:function () {
+                  ok("$.ajax#success 1");
+                },
+                error:function () {
+                  ng("$.ajax#success 1");
+                }
+              }).
+                next(function () {
+                  ok("$.ajax#success 2");
+                }).
+                error(function (e) {
+                  ng("$.ajax#success 2");
+                });
+            }).
+            next(function () {
+              return $.ajax({
+                url:"error-404" + Math.random(),
+                success:function () {
+                  ng("$.ajax#error 1");
+                },
+                error:function () {
+                  ok("$.ajax#error 1", "You may see error on console but it is correct.");
+                }
+              }).
+                next(function () {
+                  ng("$.ajax#error 2");
+                }).
+                error(function (e) {
+                  ok("$.ajax#error 2");
+                });
+            }).
+            next(function () {
+              return next(function () {
+                return $.get("./test.html");
+              }).
+                next(function () {
+                  ok("$.get#success");
+                }).
+                error(function (e) {
+                  ng("$.get#success");
+                });
+            }).
+            next(function () {
+              return next(function () {
+                return $(document.body).fadeTo(100, 0).fadeTo(100, 1).promise().next(function () {
+                  ok("promise()");
+                });
+              }).
+                error(function (e) {
+                  ng("promise()");
+                });
+            }).
+            next(function () {
+              return next(function () {
+                var d = $.Deferred();
+                setTimeout(function () {
+                  d.resolve('ok');
+                }, 10);
+                return d;
+              }).
+                next(function (e) {
+                  ok("$.Deferred " + e);
+                }).
+                error(function (e) {
+                  ng("$.Deferred");
+                });
+            }).
+            error(function (e) {
+              ng("Error on jQuery Test:", "", e);
+            });
+        } else {
+          skip("Not in browser", 16);
+        }
+        return null;
+      }).
+      next(function () {
+        msg("Canceling Test:");
+        return next(function () {
+          return next(function () {
+            msg("Calceling... No more tests below...");
+            ok("Done");
+            this.cancel();
+          }).
+            next(function () {
+              ng("Must not be called!! calceled");
+            });
+        });
+      }).
+      next(function () {
+        ng("Must not be called!! calceled");
+      }).
+      error(function (e) {
+        ng(e);
+      });
 
 
 // ::Test::End::
+  }
+
+  private function exit():void {
+    if (expects - testfuns.length == expects) {
+      print(color(32, "All tests passed"));
+    } else {
+      print(color(31, "Some tests failed..."));
+//      process.exit(1);
+      fscommand('quit');
+    }
   }
 
 

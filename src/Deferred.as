@@ -52,7 +52,7 @@ public class Deferred {
 //          var name:String = null;
 //          try {
 //            name = obj.toString().match(/^\s*function\s+([^\s()]+)/)[1];
-//          } catch (e:Error) {
+//          } catch (e:*) {
 //          }
 //          if (name != "error") {
             chain = chain.next(obj);
@@ -105,7 +105,7 @@ public class Deferred {
 //          }
           ret.call(values);
         }
-      }).error(function (e:Error):void {
+      }).error(function (e:*):void {
           ret.fail(e);
         });
       num++;
@@ -135,7 +135,7 @@ public class Deferred {
 //        }
         ret.call(values);
         ret.canceller();
-      }).error(function (e:Error):void {
+      }).error(function (e:*):void {
           ret.fail(e);
         });
       num++;
@@ -282,7 +282,7 @@ public class Deferred {
         next(function (mes:*):void {
           d.call(mes);
         }).
-        error(function (e:Error):void {
+        error(function (e:*):void {
           if (--retryCount <= 0) {
             d.fail(['retry failed', e]);
           } else {
