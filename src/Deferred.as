@@ -227,45 +227,56 @@ public class Deferred {
 //  Deferred.register("wait", Deferred.wait);
 
   static public function connect(funo:*, options:* = null, obj:Object = null):Function {
-    var target:Object, func:Function;
-    if (typeof arguments[1] == "string") {
-      target = arguments[0];
-      func = target[arguments[1]];
-      obj = arguments[2] || {};
+    trace('arguments =', arguments);
+    var target:*, func:Function;
+    if (typeof options == "string") {
+      target = funo;
+      func = target[options];
+      obj = obj || {};
     } else {
-      func = arguments[0];
-      obj = arguments[1] || {};
+      func = funo;
+      obj = options || {};
       target = obj.target;
     }
+    trace(func, target, obj);
 
-    var partialArgs:Array = obj.args ? Array.prototype.slice.call(obj.args, 0) : [];
-    var callbackArgIndex:int = isFinite(obj.ok) ? obj.ok : obj.args ? obj.args.length : undefined;
-    var errorbackArgIndex:int = (obj.ng === null) ? -1 : obj.ng;
+    var partialArgs:Array = obj.args ? obj.args : [];
+    var callbackArgIndex:int = (obj.ok != null) ? obj.ok : obj.args ? obj.args.length : -1;
+    var errorbackArgIndex:int = (obj.ng != null) ? obj.ng : -1;
 
-    return function ():Deferred {
+    return function (...args:Array):Deferred {
       var d:Deferred = new Deferred().next(function (args:Arguments):void {
+        trace('-', args);
         var next:Function = this._next.callback.ok;
         this._next.callback.ok = function ():* {
           return next.apply(this, args.args);
         };
       });
 
-      var args:Array = partialArgs.concat(Array.prototype.slice.call(arguments, 0));
+		trace('partialArgs =', obj.args, '->', partialArgs);
+      args = partialArgs.concat(args);
+      trace('--', args);
       if (!(isFinite(callbackArgIndex) && callbackArgIndex !== -1)) {
         callbackArgIndex = args.length;
       }
       var callback:Function = function ():void {
-        d.call(new Arguments(arguments))
+        d.call(new Arguments(arguments));
       };
+      trace('--', args);
       args.splice(callbackArgIndex, 0, callback);
+      trace('--', args);
       if (isFinite(errorbackArgIndex) && errorbackArgIndex !== -1) {
         var errorback:Function = function ():void {
-          d.fail(arguments)
+          d.fail(arguments);
         };
+        trace(errorbackArgIndex, args.length);
         args.splice(errorbackArgIndex, 0, errorback);
+        trace(args.length);
       }
+      trace('--', args);
       Deferred.next(function ():void {
-        func.apply(target, args)
+        trace('---', args);
+        func.apply(target, args);
       });
       return d;
     };
