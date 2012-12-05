@@ -207,8 +207,7 @@ public class Test extends Sprite {
     msg("Basic Tests::");
 
     expect("new Deferred", true, (new Deferred) instanceof Deferred);
-//    expect("Deferred()", true, Deferred() instanceof Deferred);
-    expect("skip test Deferred()", true, true); // AS では new なしのコールは型変換と取られる
+    skip("Deferred()", 1); // AS では new なしのコールは型変換と取られる
 
     new function () {
       var testobj = {};
@@ -920,12 +919,10 @@ public class Test extends Sprite {
               }, 0);
             });
             return f().next(function (a, b, c) {
-              trace('->', a,',',b,',',c);
               expect('connected function pass multiple arguments to callback', '0,1,2', [a, b, c].join(','));
               return f();
             }).
               next(function (a, b, c) {
-                trace('->', a,',',b,',',c);
                 expect('connected function pass multiple arguments to callback (child)', '0,1,2', [a, b, c].join(','));
               });
           });
@@ -1145,6 +1142,7 @@ public class Test extends Sprite {
           return next(function () {
             msg("Calceling... No more tests below...");
             ok("Done");
+            exit();
             this.cancel();
           }).
             next(function () {
