@@ -1,7 +1,6 @@
 # ASDeferred
 
-[cho45/jsdeferred](https://github.com/cho45/jsdeferred)をActionScript3.0に移植した。
-テストも移植して実行している。
+[cho45/jsdeferred](https://github.com/cho45/jsdeferred)のActionScript3.0移植。テストも移植して実行。
 
 ## チュートリアルとかAPIリファレンス
 
