@@ -79,8 +79,8 @@ AS3ではdynamicに追加したメソッドは処理速度が遅いと言われ�
 ### `chain`メソッドでerrorキャプチャを設定する方法
 
 JSDeferredではerrorという名前の関数を設定することでエラーキャプチャすることが可能だったが、
-ASDeferredでは`errorFunction`というメソッドの引数として設定する必要がある。
-AS3では関数名を取得する手段がないため、`ErrorFunction`インスタンスを返すファクトリメソッドの`errorFunction`を使うことで
+ASDeferredでは`catcher`というメソッドの引数として設定する必要がある。
+AS3では関数名を取得する手段がないため、`Catcher`インスタンスを返すファクトリメソッドの`catcher`を使うことで
 `chain`内部で型判定をしてエラーキャプチャとして解釈する実装になっている。
 
 JavaScript
@@ -127,7 +127,7 @@ ActionScript
       function (w):void {
         throw "foo";
       },
-      errorFunction(function (e:*):void {
+      catcher(function (e:*):void {
         trace(e);
       }),
       [
@@ -148,7 +148,7 @@ ActionScript
       function (result:Object):void {
         trace(result.foo, result.bar);
       },
-      errorFunction(function (e:*):void {
+      catcher(function (e:*):void {
         trace(e);
       })
     );

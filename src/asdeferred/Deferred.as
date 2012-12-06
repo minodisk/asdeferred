@@ -43,8 +43,8 @@ public class Deferred {
   static public function chain(...args:Array):Deferred {
     var chain:Deferred = Deferred.next();
     for (var i:int = 0, len:int = args.length; i < len; i++) (function (obj:*):void {
-      if (obj is ErrorFunction) {
-        chain = chain.error((obj as ErrorFunction).fun);
+      if (obj is Catcher) {
+        chain = chain.error((obj as Catcher).fun);
       } else {
         switch (typeof obj) {
           case "function":
@@ -306,8 +306,8 @@ public class Deferred {
     return Deferred;
   }
 
-  static public function errorFunction(fun:Function):ErrorFunction {
-    return new ErrorFunction(fun);
+  static public function catcher(fun:Function):Catcher {
+    return new Catcher(fun);
   }
 
 
@@ -390,10 +390,10 @@ internal class Arguments {
   }
 }
 
-internal class ErrorFunction {
+internal class Catcher {
   public var fun:Function;
 
-  public function ErrorFunction(fun:Function) {
+  public function Catcher(fun:Function) {
     this.fun = fun;
   }
 }
