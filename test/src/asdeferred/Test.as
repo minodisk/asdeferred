@@ -736,7 +736,7 @@ public class Test extends Sprite {
             throw "error";
           },
           // AS では関数名を取得することができないので ErrorFunction インスタンスのファクトリメソッドを使うことにする
-          errorFunction(function error(e) {
+          catcher(function error(e) {
             ok("error called: " + e);
           }),
           [
@@ -770,7 +770,7 @@ public class Test extends Sprite {
             expect("object is run in parallel", result.bar, 2);
           },
           // AS では関数名を取得することができないので ErrorFunction インスタンスのファクトリメソッドを使うことにする
-          errorFunction(function error(e) {
+          catcher(function error(e) {
             ng(e);
           })
         );
