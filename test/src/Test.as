@@ -1,4 +1,18 @@
+/**
+ * Ported from http://github.com/cho45/jsdeferred
+ * test-jsdeferred.js
+ * test-node.js
+ */
 package {
+import asdeferred.Deferred;
+import asdeferred.call;
+import asdeferred.errorFunction;
+import asdeferred.loop;
+import asdeferred.next;
+import asdeferred.parallel;
+import asdeferred.repeat;
+import asdeferred.wait;
+
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.net.URLLoader;
@@ -15,7 +29,7 @@ public class Test extends Sprite {
   public function Test() {
     loader = new URLLoader();
     loader.addEventListener(Event.COMPLETE, loaded);
-    loader.load(new URLRequest('../test/Test.as'));
+    loader.load(new URLRequest('../src/Test.as'));
   }
 
 
@@ -131,34 +145,6 @@ public class Test extends Sprite {
     return null;
   }
 
-  function keys(obj:Object):Array {
-    var keys:Array = []
-      , key:String
-      ;
-    for (key in obj) {
-      keys.push(key);
-    }
-    return keys;
-  }
-
-  function calcAccuracy():Deferred {
-    var d:Deferred = new Deferred();
-    var r:Array = [];
-    var i:int = 30;
-    var t:Number = new Date().getTime();
-    setTimeout(function ():void {
-      if (i-- > 0) {
-        var n:Number = new Date().getTime();
-        r.push(n - t);
-        t = n;
-        setTimeout(arguments.callee, 0);
-      } else {
-        d.call(r);
-      }
-    }, 0);
-    return d;
-  }
-
 
   // complete to load this file
   private function loaded(e:Event):void {
@@ -197,7 +183,7 @@ public class Test extends Sprite {
     }
 
     msg("Loaded " + testfuns.length + " tests;");
-    // AS では Deferred.next の実装を環境によって分けていない
+    // AS では Deferred.next の実装を環境によって分けない
 //    log("Deferred.next Mode:" + uneval({
 //      _faster_way_Image: !!Deferred.next_faster_way_Image,
 //      _faster_way_readystatechange: !!Deferred.next_faster_way_readystatechange
@@ -207,7 +193,7 @@ public class Test extends Sprite {
     msg("Basic Tests::");
 
     expect("new Deferred", true, (new Deferred) instanceof Deferred);
-    skip("Deferred()", 1); // AS では new なしのコールは型変換と取られる
+    skip("asdeferred.Deferred()", 1); // AS では new なしのコールは型変換と取られる
 
     new function () {
       var testobj = {};
@@ -218,7 +204,7 @@ public class Test extends Sprite {
 
     new function () {
       var testobj = {};
-      Deferred.define(testobj, ["next"]);
+      Deferred.define(testobj, ["asdeferred.next"]);
       expect("define() next", Deferred.next, testobj.next);
       expect("define() loop (must not be exported)", undefined, testobj.loop);
     };
@@ -246,27 +232,27 @@ public class Test extends Sprite {
         r = e;
       };
       d.fail("error");
-      expect("Deferred.onerror", "error", r);
+      expect("asdeferred.Deferred.onerror", "error", r);
 
       r = undefined;
       Deferred.onerror = null; // AS ではメンバを delete できないので null を代入する
       d.fail("error");
-      expect("Deferred.onerror", undefined, r);
+      expect("asdeferred.Deferred.onerror", undefined, r);
     };
 
     new function () {
-      expect("Deferred.isDeferred(new Deferred())", true, Deferred.isDeferred(new Deferred()));
+      expect("asdeferred.Deferred.isDeferred(new Deferred())", true, Deferred.isDeferred(new Deferred()));
 
       expect("TEST CONDITION", true, new _Deferred() instanceof Deferred); // AS版では extends で実装しているため true になる
-      expect("Deferred.isDeferred(new _Deferred())", true, Deferred.isDeferred(new _Deferred()));
+      expect("asdeferred.Deferred.isDeferred(new _Deferred())", true, Deferred.isDeferred(new _Deferred()));
 
-      expect("Deferred.isDeferred()", false, Deferred.isDeferred());
-      expect("Deferred.isDeferred(null)", false, Deferred.isDeferred(null));
-      expect("Deferred.isDeferred(true)", false, Deferred.isDeferred(true));
-      expect("Deferred.isDeferred('')", false, Deferred.isDeferred(''));
-      expect("Deferred.isDeferred(0)", false, Deferred.isDeferred(0));
-      expect("Deferred.isDeferred(undefined)", false, Deferred.isDeferred(undefined));
-      expect("Deferred.isDeferred({})", false, Deferred.isDeferred({}));
+      expect("asdeferred.Deferred.isDeferred()", false, Deferred.isDeferred());
+      expect("asdeferred.Deferred.isDeferred(null)", false, Deferred.isDeferred(null));
+      expect("asdeferred.Deferred.isDeferred(true)", false, Deferred.isDeferred(true));
+      expect("asdeferred.Deferred.isDeferred('')", false, Deferred.isDeferred(''));
+      expect("asdeferred.Deferred.isDeferred(0)", false, Deferred.isDeferred(0));
+      expect("asdeferred.Deferred.isDeferred(undefined)", false, Deferred.isDeferred(undefined));
+      expect("asdeferred.Deferred.isDeferred({})", false, Deferred.isDeferred({}));
     };
 
     Deferred.onerror = function (e) {
@@ -391,7 +377,7 @@ public class Test extends Sprite {
 
         return next(function () {
           return wait(0).next(function (i) {
-            ok("wait(0) called", "1000ms >", i);
+            ok("asdeferred.wait(0) called", "1000ms >", i);
           });
         }).
           next(function () {
@@ -1174,6 +1160,8 @@ public class Test extends Sprite {
 
 }
 }
+
+import asdeferred.Deferred;
 
 // Make different origin Deferred class;
 internal class _Deferred extends Deferred {

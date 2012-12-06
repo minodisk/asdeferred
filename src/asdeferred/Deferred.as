@@ -5,7 +5,7 @@
  * JSDeferred 0.4.0 Copyright (c) 2007 cho45 ( www.lowreal.net )
  * See http://github.com/cho45/jsdeferred
  */
-package {
+package asdeferred {
 import flash.utils.clearTimeout;
 import flash.utils.setTimeout;
 
@@ -295,7 +295,7 @@ public class Deferred {
   }
 
   static public function define(obj:Object, list:Array = null):Class {
-    if (list === null) list = Deferred.methods;
+    if (list == null) list = Deferred.methods;
 //    if (obj === null)  obj = (function getGlobal() {
 //      return this
 //    })();
