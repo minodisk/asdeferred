@@ -3,16 +3,7 @@
  * test-jsdeferred.js
  * test-node.js
  */
-package {
-import asdeferred.Deferred;
-import asdeferred.call;
-import asdeferred.errorFunction;
-import asdeferred.loop;
-import asdeferred.next;
-import asdeferred.parallel;
-import asdeferred.repeat;
-import asdeferred.wait;
-
+package asdeferred {
 import flash.display.Sprite;
 import flash.events.Event;
 import flash.net.URLLoader;
@@ -29,7 +20,7 @@ public class Test extends Sprite {
   public function Test() {
     loader = new URLLoader();
     loader.addEventListener(Event.COMPLETE, loaded);
-    loader.load(new URLRequest('../src/Test.as'));
+    loader.load(new URLRequest('../src/asdeferred/Test.as'));
   }
 
 
@@ -48,7 +39,6 @@ public class Test extends Sprite {
       result = (typeof result == "function") ? uneval(result).match(/[^{]+/) + "..." : uneval(result);
       out.push(["NG Test::", msg, expect, result].join("\n"));
       trace(out.join(""));
-//      process.exit(1);
       exit();
     } else {
       testfuns.pop();
@@ -193,7 +183,7 @@ public class Test extends Sprite {
     msg("Basic Tests::");
 
     expect("new Deferred", true, (new Deferred) instanceof Deferred);
-    skip("asdeferred.Deferred()", 1); // AS では new なしのコールは型変換と取られる
+    skip("Deferred()", 1); // AS では new なしのコールはキャストと解釈されるためスキップ
 
     new function () {
       var testobj = {};
@@ -204,7 +194,7 @@ public class Test extends Sprite {
 
     new function () {
       var testobj = {};
-      Deferred.define(testobj, ["asdeferred.next"]);
+      Deferred.define(testobj, ["next"]);
       expect("define() next", Deferred.next, testobj.next);
       expect("define() loop (must not be exported)", undefined, testobj.loop);
     };
@@ -232,27 +222,27 @@ public class Test extends Sprite {
         r = e;
       };
       d.fail("error");
-      expect("asdeferred.Deferred.onerror", "error", r);
+      expect("Deferred.onerror", "error", r);
 
       r = undefined;
       Deferred.onerror = null; // AS ではメンバを delete できないので null を代入する
       d.fail("error");
-      expect("asdeferred.Deferred.onerror", undefined, r);
+      expect("Deferred.onerror", undefined, r);
     };
 
     new function () {
-      expect("asdeferred.Deferred.isDeferred(new Deferred())", true, Deferred.isDeferred(new Deferred()));
+      expect("Deferred.isDeferred(new Deferred())", true, Deferred.isDeferred(new Deferred()));
 
       expect("TEST CONDITION", true, new _Deferred() instanceof Deferred); // AS版では extends で実装しているため true になる
-      expect("asdeferred.Deferred.isDeferred(new _Deferred())", true, Deferred.isDeferred(new _Deferred()));
+      expect("Deferred.isDeferred(new _Deferred())", true, Deferred.isDeferred(new _Deferred()));
 
-      expect("asdeferred.Deferred.isDeferred()", false, Deferred.isDeferred());
-      expect("asdeferred.Deferred.isDeferred(null)", false, Deferred.isDeferred(null));
-      expect("asdeferred.Deferred.isDeferred(true)", false, Deferred.isDeferred(true));
-      expect("asdeferred.Deferred.isDeferred('')", false, Deferred.isDeferred(''));
-      expect("asdeferred.Deferred.isDeferred(0)", false, Deferred.isDeferred(0));
-      expect("asdeferred.Deferred.isDeferred(undefined)", false, Deferred.isDeferred(undefined));
-      expect("asdeferred.Deferred.isDeferred({})", false, Deferred.isDeferred({}));
+      expect("Deferred.isDeferred()", false, Deferred.isDeferred());
+      expect("Deferred.isDeferred(null)", false, Deferred.isDeferred(null));
+      expect("Deferred.isDeferred(true)", false, Deferred.isDeferred(true));
+      expect("Deferred.isDeferred('')", false, Deferred.isDeferred(''));
+      expect("Deferred.isDeferred(0)", false, Deferred.isDeferred(0));
+      expect("Deferred.isDeferred(undefined)", false, Deferred.isDeferred(undefined));
+      expect("Deferred.isDeferred({})", false, Deferred.isDeferred({}));
     };
 
     Deferred.onerror = function (e) {
@@ -377,7 +367,7 @@ public class Test extends Sprite {
 
         return next(function () {
           return wait(0).next(function (i) {
-            ok("asdeferred.wait(0) called", "1000ms >", i);
+            ok("wait(0) called", "1000ms >", i);
           });
         }).
           next(function () {
@@ -1152,7 +1142,6 @@ public class Test extends Sprite {
       print(color(32, "All tests passed"));
     } else {
       print(color(31, "Some tests failed..."));
-//      process.exit(1);
       fscommand('quit');
     }
   }
