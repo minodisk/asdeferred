@@ -6,12 +6,12 @@
 ## チュートリアルとかAPIリファレンス
 
 [JSDeferred - Asynchronous library in JavaScript. Standalone and Compact](http://cho45.stfuawsc.com/jsdeferred/)参照。
-ただし、使い方の異なる点があるので[JSDeferredとの違い](#jsdeferredJSDeferredとの違い)も参照。
+ただし、使い方の異なる点があるので[JSDeferredとの違い](#jsdeferredとの違い)も参照。
 
 ## JSDeferredとの違い
 
-基本的にはJSDeferredの使い勝手を維持できるように移植したが、言語仕様上実装や使用方法が異なっている点がある。
-まず大きな違いとしては型を指定しなければならないわけだが、この辺りは当然の事なので割愛し、重要な違いと代替手段を下記に説明する。
+JSDeferredの使い勝手をなるべく維持できるように移植したが、言語仕様の違いから実装や使用方法が異なっている点がある。
+まず大きな違いとしては型を指定しなければならないわけだが、この辺りは当然の事なので割愛し重要な違いと代替手段を下記に説明する。
 コード例の一部を[JSDeferred - Asynchronous library in JavaScript. Standalone and Compact](http://cho45.stfuawsc.com/jsdeferred/)
 から抜粋して比較している。
 
@@ -47,7 +47,7 @@ ActionScript
     });
 
 ASDeferredにも`define`メソッドは存在するが第一引数は必須で、オブジェクトに静的メソッドの参照をプロパティとして追加することはできるが、
-globalにプロパティを追加できない以上は、使用するシチュエーションはあまりないと思われる。
+globalにプロパティを追加できない以上は使用するシチュエーションはあまりないと思われる。
 
     var obj:Object = {};
     define(obj, ['next', 'wait']);
@@ -127,9 +127,9 @@ ActionScript
       function (w):void {
         throw "foo";
       },
-      errorFunction(function (e:*):void { // <- errorFunction(
+      errorFunction(function (e:*):void {
         trace(e);
-      }),                                 // <- )
+      }),
       [
         function ():Deferred {
           return wait(1);
@@ -148,7 +148,7 @@ ActionScript
       function (result:Object):void {
         trace(result.foo, result.bar);
       },
-      errorFunction(function (e:*):void { // <- errorFunction(
+      errorFunction(function (e:*):void {
         trace(e);
-      })                                  // <- )
+      })
     );
