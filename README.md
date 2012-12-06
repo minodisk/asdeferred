@@ -11,7 +11,7 @@
 ## JSDeferredとの違い
 
 JSDeferredの使い勝手をなるべく維持できるように移植したが、言語仕様の違いから実装や使用方法が異なっている点がある。
-まず大きな違いとしては型を指定しなければならないわけだが、この辺りは当然の事なので割愛し重要な違いと代替手段を下記に説明する。
+重要な違いと代替手段を下記に説明する。
 コード例の一部を[JSDeferred - Asynchronous library in JavaScript. Standalone and Compact](http://cho45.stfuawsc.com/jsdeferred/)
 から抜粋して比較している。
 
@@ -76,12 +76,11 @@ AS3ではdynamicに追加したメソッドは処理速度が遅いと言われ�
         print(n);
     });
 
-### `chain`メソッドでerrorキャプチャを設定する方法
+### `chain`メソッドでエラーをキャッチする方法
 
-JSDeferredではerrorという名前の関数を設定することでエラーキャプチャすることが可能だったが、
-ASDeferredでは`catcher`というメソッドの引数として設定する必要がある。
-AS3では関数名を取得する手段がないため、`Catcher`インスタンスを返すファクトリメソッドの`catcher`を使うことで
-`chain`内部で型判定をしてエラーキャプチャとして解釈する実装になっている。
+JSDeferredではerrorという名前の関数を`chain`の引数にすることでエラーを処理する関数を設定することが可能だが、
+ASDeferredでは`catcher`という`Catcher`インスタンスを返すファクトリメソッドの引数としてエラーを処理する関数を設定する必要がある。
+AS3では関数名を取得する手段がないため、`chain`の引数を走査する際に`Catcher`インスタンスかを判定し、エラーを処理する関数を判別する実装になっている。
 
 JavaScript
 
@@ -107,8 +106,12 @@ JavaScript
         console.log(result[0], result[1]);
       },
       {
-        foo: wait(1),
-        bar: wait(1)
+        foo: function () {
+          return wait(1);
+        },
+        bar: function () {
+          return wait(2);
+        }
       },
       function (result) {
         console.log(result.foo, result.bar);
@@ -142,8 +145,12 @@ ActionScript
         trace(result[0], result[1]);
       },
       {
-        foo: wait(1),
-        bar: wait(1)
+        foo: functino ():void {
+          return wait(1);
+        },
+        bar: functino ():void {
+          return wait(1);
+        }
       },
       function (result:Object):void {
         trace(result.foo, result.bar);
