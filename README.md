@@ -1,15 +1,16 @@
 # ASDeferred
 
 [cho45/jsdeferred](https://github.com/cho45/jsdeferred)のActionScript3.0移植。テストも移植して実行。
+lib/asdeferrd.swc か src/asdeferred を読み込んで使用。
 
 ## チュートリアルとかAPIリファレンス
 
 [JSDeferred - Asynchronous library in JavaScript. Standalone and Compact](http://cho45.stfuawsc.com/jsdeferred/)参照。
-ただし、使い方の異なる点があるので[JSDeferredとの違い](#jsdeferredとの違い)も参照。
+使い方の異なる点があるので[JSDeferredとの違い](#jsdeferredとの違い)も参照。
 
 ## JSDeferredとの違い
 
-JSDeferredの使い勝手をなるべく維持できるように移植したが、言語仕様の違いから実装や使用方法が異なっている点がある。
+JSDeferredの使い勝手をなるべく維持できるように移植したが、言語仕様の違いから使用方法が異なっている点がある。
 重要な違いと代替手段を下記に説明する。
 コード例の一部を[JSDeferred - Asynchronous library in JavaScript. Standalone and Compact](http://cho45.stfuawsc.com/jsdeferred/)
 から抜粋して比較している。
@@ -20,44 +21,48 @@ JSDeferredには`define`メソッドが存在し、引数を与えずに実行�
 ASDeferredではasdeferredパッケージ空間のショートカットメソッドをimportする必要がある。
 AS3の言語仕様上globalにプロパティを追加することはできないため。
 
-JavaScript
+JSDeferred
+```javascript
+Deferred.define();
 
-    Deferred.define();
+next(function () {
+  console.log("Hello!");
+  return wait(5);
+}).
+next(function () {
+  console.log("World!");
+});
+```
 
-    next(function () {
-      console.log("Hello!");
-      return wait(5);
-    }).
-    next(function () {
-      console.log("World!");
-    });
+ASDeferred
+```actionscript
+import asdeferred.next;
+import asdeferred.wait;
 
-ActionScript
-
-    import asdeferred.next;
-    import asdeferred.wait;
-
-    next(function ():Deferred {
-      trace("Hello!");
-      return wait(5);
-    }).
-    next(function ():void {
-      trace("World!");
-    });
+next(function ():Deferred {
+  trace("Hello!");
+  return wait(5);
+}).
+next(function ():void {
+  trace("World!");
+});
+```
 
 ASDeferredにも`define`メソッドは存在するが第一引数は必須で、オブジェクトに静的メソッドの参照をプロパティとして追加することはできるが、
 globalにプロパティを追加できない以上は使用するシチュエーションはあまりないと思われる。
 
-    var obj:Object = {};
-    define(obj, ['next', 'wait']);
-    obj.
-      next(function ():Deferred {
-        trace("Hello!");
-        return obj.wait(5);
-      }).
-      next(function ():void {
-        trace("World!");
-      });
+```actionscript
+var obj:Object = {};
+define(obj, ['next', 'wait']);
+obj.
+  next(function ():Deferred {
+    trace("Hello!");
+    return obj.wait(5);
+  }).
+  next(function ():void {
+    trace("World!");
+  });
+```
 
 ### `register`メソッドの存在
 
@@ -82,79 +87,81 @@ ASDeferredでは`catcher`という`Catcher`インスタンスを返すファク�
 AS3では関数名を取得する手段がないため、`chain`の引数を走査する際に`Catcher`インスタンスかを判定し、エラーを処理する関数を判別する実装になっている。
 
 JavaScript
-
-    chain(
-      function () {
-        return wait(0.5);
-      },
-      function (w) {
-        throw "foo";
-      },
-      function error (e) {
-        console.log(e);
-      },
-      [
-        function () {
-          return wait(1);
-        },
-        function () {
-          return wait(2);
-        }
-      ],
-      function (result) {
-        console.log(result[0], result[1]);
-      },
-      {
-        foo: function () {
-          return wait(1);
-        },
-        bar: function () {
-          return wait(2);
-        }
-      },
-      function (result) {
-        console.log(result.foo, result.bar);
-      },
-      function error (e) {
-        console.log(e);
-      }
-    );
+```javascript
+chain(
+  function () {
+    return wait(0.5);
+  },
+  function (w) {
+    throw "foo";
+  },
+  function error (e) {
+    console.log(e);
+  },
+  [
+    function () {
+      return wait(1);
+    },
+    function () {
+      return wait(2);
+    }
+  ],
+  function (result) {
+    console.log(result[0], result[1]);
+  },
+  {
+    foo: function () {
+      return wait(1);
+    },
+    bar: function () {
+      return wait(2);
+    }
+  },
+  function (result) {
+    console.log(result.foo, result.bar);
+  },
+  function error (e) {
+    console.log(e);
+  }
+);
+```
 
 ActionScript
-
-    chain(
-      function ():Deferred {
-        return wait(0.5);
-      },
-      function (w):void {
-        throw "foo";
-      },
-      catcher(function (e:*):void {
-        trace(e);
-      }),
-      [
-        function ():Deferred {
-          return wait(1);
-        },
-        function ():Deferred {
-          return wait(2);
-        }
-      ],
-      function (result:Array):void {
-        trace(result[0], result[1]);
-      },
-      {
-        foo: functino ():void {
-          return wait(1);
-        },
-        bar: functino ():void {
-          return wait(1);
-        }
-      },
-      function (result:Object):void {
-        trace(result.foo, result.bar);
-      },
-      catcher(function (e:*):void {
-        trace(e);
-      })
-    );
+```javascript
+chain(
+  function ():Deferred {
+    return wait(0.5);
+  },
+  function (w):void {
+    throw "foo";
+  },
+  catcher(function (e:*):void {
+    trace(e);
+  }),
+  [
+    function ():Deferred {
+      return wait(1);
+    },
+    function ():Deferred {
+      return wait(2);
+    }
+  ],
+  function (result:Array):void {
+    trace(result[0], result[1]);
+  },
+  {
+    foo: functino ():void {
+      return wait(1);
+    },
+    bar: functino ():void {
+      return wait(1);
+    }
+  },
+  function (result:Object):void {
+    trace(result.foo, result.bar);
+  },
+  catcher(function (e:*):void {
+    trace(e);
+  })
+);
+```
