@@ -10,7 +10,7 @@ lib/asdeferrd.swc か src/asdeferred を読み込んで使用。
 
 ## JSDeferredとの違い
 
-JSDeferredの使い勝手をなるべく維持できるように移植したが、言語仕様の違いから使用方法が異なっている点がある。
+言語仕様の違いから使用方法が異なっている点がある。
 重要な違いと代替手段を下記に説明する。
 コード例の一部を[JSDeferred - Asynchronous library in JavaScript. Standalone and Compact](http://cho45.stfuawsc.com/jsdeferred/)
 から抜粋して比較している。
@@ -67,18 +67,7 @@ obj.
 ### `register`メソッドの存在
 
 JSDeferredには`register`メソッドが存在し、Deferredのprototypeに静的メソッドのコピーを作ることが可能だが、
-AS3ではdynamicに追加したメソッドは処理速度が遅いと言われているので使用は慎重に。
-
-    // Deferred.register("loop", loop);
-
-    // Global Deferred function
-    loop(10, function (n) {
-        print(n);
-    }).
-    // Registered Deferred.prototype.loop
-    loop(10, function (n) {
-        print(n);
-    });
+ASDeferredには存在しない。
 
 ### `chain`メソッドでエラーをキャッチする方法
 
@@ -114,7 +103,7 @@ chain(
       return wait(1);
     },
     bar: function () {
-      return wait(2);
+      return wait(1);
     }
   },
   function (result) {
